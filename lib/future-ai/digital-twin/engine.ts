@@ -150,6 +150,7 @@ export function computeDigitalTwinProfile(userId: string, ctx: DigitalTwinContex
     lastSimulatedAt: new Date().toISOString(),
     modelVersion: "dtwin-2.0.1",
     confidence: Math.round(confidence),
+    trainingLoad: ctx.trainingLoad,
   };
 }
 

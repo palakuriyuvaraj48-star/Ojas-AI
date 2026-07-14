@@ -157,7 +157,7 @@ export function computeEquipmentRecommendations(userId: string): EquipmentRecomm
 
   return allExercises
     .filter((ex) => !exercised.has(ex))
-    .map((name, idx) => ({
+    .map((name, idx): EquipmentRecommendation => ({
       id: `rec-${Date.now()}-${idx}`,
       name,
       type: name.toLowerCase().includes("press") || name.toLowerCase().includes("row") || name.toLowerCase().includes("dip") ? "strength" : "functional",

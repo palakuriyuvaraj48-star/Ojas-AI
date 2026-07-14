@@ -5,6 +5,7 @@
  */
 
 import type { ConfidenceLevel } from "@/lib/future-ai/types";
+export type { ConfidenceLevel };
 
 export type ARCoachMode = "beginner" | "form" | "power" | "endurance";
 
@@ -92,6 +93,7 @@ export interface ARCoachSession {
   commonMistakes: string[];
   improvementSuggestions: string[];
   recordingUrl?: string;
+  seed?: number;
   jointAngles: JointAngleSample[];
   metadata: Record<string, unknown>;
 }

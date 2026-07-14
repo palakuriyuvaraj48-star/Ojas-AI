@@ -10,6 +10,6 @@ export type {
   PredictionDrift,
   PredictionHorizon,
   ConfidenceLevel,
-  TrendData,
+  TrendPoint,
   PredictionHistory,
 } from "@/lib/future-ai/types";

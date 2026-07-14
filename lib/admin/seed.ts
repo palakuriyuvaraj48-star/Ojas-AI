@@ -242,7 +242,7 @@ export function seedCampaigns(): NotificationCampaign[] {
   const id = `cmp_${randomToken(8)}`;
   return [{
     id, name: "Weekly Workout Nudge", channel: "push", templateId: "workout_reminder",
-    audience: { segments: ["active"] }, schedule: { type: "recurring", timezone: "UTC", recurring: { frequency: "weekly", atHour: 9, timezone: "UTC" } },
+    audience: { segments: ["active"], includeUserIds: [], excludeUserIds: [] }, schedule: { type: "recurring", timezone: "UTC", recurring: { frequency: "weekly", atHour: 9, timezone: "UTC" } },
     status: "scheduled", personalization: {}, subject: "Time to train", title: "Time to train, {{user_name}}",
     body: "Your session is ready.",
     stats: { recipientCount: 12480, queued: 12480, sent: 11890, delivered: 11540, opened: 6120, clicked: 1480, converted: 320, unsubscribed: 42, bounced: 18, failed: 350 },

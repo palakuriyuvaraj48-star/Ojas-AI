@@ -23,6 +23,7 @@ export interface PredictionMeta {
 export interface Factor {
   id: string;
   name: string;
+  category?: string;
   impact: "positive" | "negative" | "neutral";
   weight: number;
   description: string;
@@ -54,6 +55,7 @@ export interface DigitalTwinProfile {
   confidence: number;
   lastSimulatedAt: string;
   modelVersion: string;
+  trainingLoad?: number;
 }
 
 export interface DigitalTwinPrediction {

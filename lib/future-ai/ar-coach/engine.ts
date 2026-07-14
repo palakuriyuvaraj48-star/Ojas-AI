@@ -19,6 +19,7 @@ import type {
   ARExerciseDef,
   CoachingCue,
   ConfidenceLevel,
+  ImprovementSuggestion,
   JointAngleSample,
   JointName,
   JointStressResult,
@@ -699,7 +700,7 @@ function buildAnalytics(
 }
 
 function toPublic(session: ActiveSession): ARCoachSession {
-  const { frameIndex, cycle, framesPerRep, repRomHistory, liveForm, tempoLifting, tempoLowering, tempoPause, peakAngles, rng, seed, ...rest } = session;
+  const { frameIndex, cycle, framesPerRep, repRomHistory, liveForm, tempoLifting, tempoLowering, tempoPause, peakAngles, rng, ...rest } = session;
   void frameIndex;
   void cycle;
   void framesPerRep;
@@ -710,7 +711,6 @@ function toPublic(session: ActiveSession): ARCoachSession {
   void tempoPause;
   void peakAngles;
   void rng;
-  void seed;
   return { ...rest };
 }
 

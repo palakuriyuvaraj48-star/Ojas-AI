@@ -45,7 +45,7 @@ export interface HealthRiskCategoryMeta {
   short: string;
   icon: string;
   description: string;
-  higherIsWorse: boolean;
+  higherIsWorse?: boolean;
 }
 
 export const HEALTH_RISK_CATEGORIES: HealthRiskCategoryMeta[] = [
