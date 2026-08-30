@@ -61,10 +61,12 @@ import { WeeklyPlannerView } from "@/components/fitness/premium/weekly-planner-v
 import { NotificationsView } from "@/components/fitness/premium/notifications-view";
 import { AutomationView } from "@/components/fitness/premium/automation-view";
 import { Onboarding } from "@/components/fitness/onboarding";
+import { AdaptivePlanningDemo } from "@/components/fitness/adaptive-planning-demo";
 import { Sidebar, TopNav, BottomNav, GlobalAIButton } from "@/components/navigation";
 
 const navigation = [
   { href: "/dashboard", label: "Dashboard", icon: Activity },
+  { href: "/adaptive-demo", label: "SIH Demo", icon: Sparkles },
   { href: "/twin", label: "AI Digital Twin", icon: Sparkles },
   { href: "/workout", label: "Workout Plan", icon: Dumbbell },
   { href: "/form-coach", label: "Smart Form Coach", icon: Crosshair },
@@ -195,6 +197,10 @@ export function ExperienceShell({ slug }: { slug: string }) {
     switch (current) {
       case "dashboard":
         return <DashboardView />;
+      case "adaptive-demo":
+      case "sih-demo":
+      case "adaptive-planning":
+        return <AdaptivePlanningDemo />;
       case "twin":
       case "digital-twin":
       case "ai-digital-twin":

@@ -120,12 +120,17 @@ export interface QualityMetrics {
 
 export type FeedbackSeverity = "info" | "success" | "warning" | "danger";
 
+export type MovementPhase = "ready" | "descending" | "bottom" | "ascending" | "complete";
+
 export interface FormFeedback {
   id: string;
   severity: FeedbackSeverity;
   message: string;
   joint?: JointName;
   cue?: string;
+  what?: string;
+  why?: string;
+  how?: string;
 }
 
 export interface FormScore {
@@ -148,6 +153,10 @@ export interface RepRecord {
   symmetryIndex: number;
   partial: boolean;
   score: number;
+  issue?: string;
+  why?: string;
+  how?: string;
+  metrics?: QualityMetrics;
 }
 
 export interface RepCounterUpdate { reps: number; partialReps: number; completed: boolean; rep?: RepRecord; }

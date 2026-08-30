@@ -57,7 +57,79 @@ export function saveSession(input: VisionSessionInput): CameraSessionRecord {
   const all = getSessions();
   all.unshift(record);
   write(TABLES.FORM_SESSIONS, all);
+
+  // Synchronize workout session data to Digital Twin and Daily Logs
+  syncSessionToDigitalTwin(record);
+
   return record;
+}
+
+function syncSessionToDigitalTwin(record: CameraSessionRecord) {
+  if (typeof window === "undefined") return;
+  try {
+    const today = new Date().toISOString().split("T")[0];
+
+    // 1. Update Daily Log in lumina_logs
+    const rawLogs = window.localStorage.getItem("lumina_logs");
+    let logs: any[] = rawLogs ? JSON.parse(rawLogs) : [];
+    const todayIdx = logs.findIndex((l) => l.date === today);
+    const durationMin = Math.max(1, Math.round(record.durationMs / 60000));
+
+    if (todayIdx >= 0) {
+      logs[todayIdx].workoutCompleted = true;
+      logs[todayIdx].workoutDuration = (logs[todayIdx].workoutDuration || 0) + durationMin;
+    } else {
+      logs.unshift({
+        date: today,
+        caloriesConsumed: 0,
+        proteinConsumed: 0,
+        carbsConsumed: 0,
+        fatConsumed: 0,
+        waterConsumed: 0,
+        stepsCount: 0,
+        workoutCompleted: true,
+        workoutDuration: durationMin,
+      });
+    }
+    window.localStorage.setItem("lumina_logs", JSON.stringify(logs));
+
+    // 2. Update Digital Twin in ojas_digital_twin
+    const rawTwin = window.localStorage.getItem("ojas_digital_twin");
+    if (rawTwin) {
+      const twin = JSON.parse(rawTwin);
+      twin.version = (twin.version || 1) + 1;
+      twin.lastUpdated = new Date().toISOString();
+
+      if (!twin.physical) twin.physical = {};
+      if (!twin.physical.workoutPerformance) twin.physical.workoutPerformance = { exercises: [], avgDuration: 30 };
+      if (!twin.physical.workoutPerformance.exercises.includes(record.exercise)) {
+        twin.physical.workoutPerformance.exercises.push(record.exercise);
+      }
+      twin.physical.workoutPerformance.avgDuration = Math.round(
+        (twin.physical.workoutPerformance.avgDuration + durationMin) / 2
+      );
+
+      if (record.formScore >= 80) {
+        twin.physical.strengthTrend = "increasing";
+      }
+
+      if (!twin.behavioral) twin.behavioral = {};
+      twin.behavioral.workoutConsistency = Math.min(
+        100,
+        (twin.behavioral.workoutConsistency || 60) + 4
+      );
+
+      if (!twin.recentChanges) twin.recentChanges = [];
+      twin.recentChanges.unshift({
+        timestamp: new Date().toISOString(),
+        reason: `Live Vision Workout: ${record.exercise} (${record.reps} reps, ${record.formScore}/100 form)`,
+      });
+
+      window.localStorage.setItem("ojas_digital_twin", JSON.stringify(twin));
+    }
+  } catch (err) {
+    console.warn("Digital Twin sync error:", err);
+  }
 }
 
 export function deleteSession(id: string) {

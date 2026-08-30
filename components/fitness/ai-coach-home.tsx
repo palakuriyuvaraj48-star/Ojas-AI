@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useFitness } from "@/components/providers/fitness-provider";
 import { useCoachContext } from "@/lib/coach/storage";
 import { GlassCard } from "@/components/ui/glass-card";
@@ -31,6 +31,41 @@ export function AICoachHome({ setActiveTab }: AICoachHomeProps) {
   const { profile, dailyLog, logWater, streak } = useFitness();
   const { ctx, dailyPlan } = useCoachContext();
   const [waterLoggedMessage, setWaterLoggedMessage] = useState(false);
+  const [aiHealth, setAiHealth] = useState<{ status: string; model: string; ollama: boolean } | null>(null);
+  const [digitalTwinRec, setDigitalTwinRec] = useState<any>(null);
+  const [loadingRec, setLoadingRec] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/ai/health?init=true")
+      .then((res) => res.json())
+      .then((data) => setAiHealth(data))
+      .catch(() => setAiHealth({ status: "unavailable", model: "gemma3:4b", ollama: false }));
+  }, []);
+
+  const fetchDigitalTwinRec = async () => {
+    if (!profile) return;
+    setLoadingRec(true);
+    try {
+      const res = await fetch("/api/ai/coach", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          profile,
+          logs: dailyLog ? [dailyLog] : [],
+          recovery: { score: ctx?.recovery?.score ?? 70, fatigue: ctx?.recovery?.fatigue ?? 35 },
+          prompt: "Generate today's personalized workout and recovery based on my Digital Twin state.",
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setDigitalTwinRec(data);
+      }
+    } catch (e) {
+      console.error("[OJAS AI] Error fetching digital twin recommendation:", e);
+    } finally {
+      setLoadingRec(false);
+    }
+  };
 
   if (!profile || !dailyLog || !ctx) {
     return (
@@ -108,10 +143,32 @@ export function AICoachHome({ setActiveTab }: AICoachHomeProps) {
         <div className="absolute top-0 right-0 h-40 w-40 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative z-10">
           <div>
-            <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-              <Sparkles className="h-6 w-6 text-[#adc6ff] animate-pulse" />
-              Hey {profile.name ? profile.name.split(" ")[0] : "Maya"}, {dailyPlan?.greeting || "Coach active"}
-            </h2>
+            <div className="flex flex-wrap items-center gap-3">
+              <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+                <Sparkles className="h-6 w-6 text-[#adc6ff] animate-pulse" />
+                Hey {profile.name ? profile.name.split(" ")[0] : "Maya"}, {dailyPlan?.greeting || "Coach active"}
+              </h2>
+              <span
+                className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                  aiHealth?.ollama && aiHealth?.status === "ready"
+                    ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30"
+                    : aiHealth?.status === "model_missing"
+                    ? "bg-amber-500/15 text-amber-300 border border-amber-500/30"
+                    : "bg-cyan-500/15 text-cyan-300 border border-cyan-500/30"
+                }`}
+              >
+                <span
+                  className={`h-1.5 w-1.5 rounded-full ${
+                    aiHealth?.ollama && aiHealth?.status === "ready"
+                      ? "bg-emerald-400 animate-pulse"
+                      : "bg-cyan-400"
+                  }`}
+                />
+                {aiHealth?.ollama && aiHealth?.status === "ready"
+                  ? `Ollama: ${aiHealth.model}`
+                  : "Ojas Intelligence Engine"}
+              </span>
+            </div>
             <p className="text-xs text-white/60 mt-1 max-w-xl">
               {dailyPlan?.motivation || "Consistency is the root of progress. Let's make today count."}
             </p>
@@ -214,9 +271,97 @@ export function AICoachHome({ setActiveTab }: AICoachHomeProps) {
 
           {/* AI Suggestions Section */}
           <div className="space-y-4">
-            <h3 className="font-bold text-white text-sm flex items-center gap-2">
-              <Compass className="h-4.5 w-4.5 text-[#adc6ff]" /> AI Suggestions & Explanations
-            </h3>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h3 className="font-bold text-white text-sm flex items-center gap-2">
+                <Compass className="h-4.5 w-4.5 text-[#adc6ff]" /> AI Suggestions & Explanations
+              </h3>
+              <button
+                onClick={fetchDigitalTwinRec}
+                disabled={loadingRec}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-cyan-400/10 border border-cyan-400/30 px-3 py-1.5 text-xs font-bold text-cyan-300 hover:bg-cyan-400/20 transition disabled:opacity-50 shadow-sm"
+              >
+                <Sparkles className={`h-3.5 w-3.5 ${loadingRec ? "animate-spin" : ""}`} />
+                {loadingRec ? "Reasoning with Gemma 3..." : "Personalize via Digital Twin"}
+              </button>
+            </div>
+
+            {/* Live Digital Twin AI Recommendation Card (Gemma 3 4B) */}
+            {digitalTwinRec && digitalTwinRec.recommendation && (
+              <GlassCard className="p-5 border-cyan-400/30 bg-gradient-to-r from-cyan-950/30 via-slate-900/60 to-cyan-950/20 relative overflow-hidden">
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/5 pb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="h-2 w-2 rounded-full bg-cyan-400 animate-pulse" />
+                    <span className="text-xs font-bold uppercase tracking-wider text-cyan-300">
+                      Gemma 3 4B · Live Digital Twin Adaptation
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-semibold text-cyan-300 bg-cyan-500/10 border border-cyan-500/20 px-2 py-0.5 rounded-full">
+                      Personalized from your Digital Twin
+                    </span>
+                    {digitalTwinRec.knowledge_used && (
+                      <span className="text-[10px] font-semibold text-purple-300 bg-purple-500/10 border border-purple-500/20 px-2 py-0.5 rounded-full">
+                        Fitness Knowledge Applied
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Adaptation State Pill */}
+                {digitalTwinRec.adaptation && (
+                  <div className="mt-2.5 flex flex-wrap items-center gap-2 text-[10px]">
+                    <span className="bg-amber-400/10 border border-amber-400/30 text-amber-300 px-2 py-0.5 rounded font-bold uppercase">
+                      State: {digitalTwinRec.adaptation.state}
+                    </span>
+                    {digitalTwinRec.adaptation.changes_from_normal_plan?.map((change: string, idx: number) => (
+                      <span key={idx} className="bg-white/5 text-white/70 px-2 py-0.5 rounded">
+                        • {change}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                <div className="mt-3 grid gap-4 sm:grid-cols-3 text-xs">
+                  <div className="bg-black/30 rounded-xl p-3 border border-white/5">
+                    <p className="text-[10px] font-bold uppercase text-cyan-300">Adapted Workout</p>
+                    <p className="font-bold text-white mt-1 text-sm">{digitalTwinRec.recommendation.workout}</p>
+                    <p className="text-white/60 text-[11px] mt-0.5">
+                      {digitalTwinRec.recommendation.duration_minutes} min · {digitalTwinRec.recommendation.intensity}
+                    </p>
+                    {digitalTwinRec.recommendation.exercises && digitalTwinRec.recommendation.exercises.length > 0 && (
+                      <div className="mt-2 pt-2 border-t border-white/5 space-y-1">
+                        <p className="text-[9px] font-bold uppercase text-white/40">Exercise Sequence</p>
+                        {digitalTwinRec.recommendation.exercises.slice(0, 3).map((ex: string, i: number) => (
+                          <p key={i} className="text-[10px] text-white/70 truncate">• {ex}</p>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <div className="bg-black/30 rounded-xl p-3 border border-white/5">
+                    <p className="text-[10px] font-bold uppercase text-purple-300">Nutrition Focus</p>
+                    <p className="text-white/80 text-[11px] mt-1 leading-relaxed">
+                      {digitalTwinRec.recommendation.nutrition}
+                    </p>
+                    {digitalTwinRec.recommendation.hydration && (
+                      <p className="text-[10px] text-cyan-300/80 mt-2">
+                        💧 {digitalTwinRec.recommendation.hydration}
+                      </p>
+                    )}
+                  </div>
+                  <div className="bg-black/30 rounded-xl p-3 border border-white/5">
+                    <p className="text-[10px] font-bold uppercase text-emerald-300">Recovery Action</p>
+                    <p className="text-white/80 text-[11px] mt-1 leading-relaxed">
+                      {digitalTwinRec.recommendation.recovery}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-3 rounded-xl bg-cyan-400/5 border border-cyan-400/15 p-3 text-xs text-white/80">
+                  <p className="text-[10px] font-bold uppercase text-cyan-300 mb-1">Why Ojas chose this plan:</p>
+                  <p className="italic text-white/70">“{digitalTwinRec.recommendation.reason}”</p>
+                </div>
+              </GlassCard>
+            )}
 
             {/* Advice Cards */}
             <div className="grid gap-4 md:grid-cols-3">

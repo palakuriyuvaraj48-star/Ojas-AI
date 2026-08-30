@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { EXERCISES_DATABASE } from "../exercises/route";
+import { EXERCISES_DATABASE } from "@/lib/workouts/exercises";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);

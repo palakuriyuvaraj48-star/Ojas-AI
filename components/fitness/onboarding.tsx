@@ -76,6 +76,7 @@ export function Onboarding() {
     dailyStepGoal: 9000,
     occupation: "Product Designer",
     workoutDaysPerWeek: 4,
+    availableWorkoutTime: 45,
     medicalConditions: "None",
     injuries: "None",
     foodPreference: "both",
@@ -158,6 +159,7 @@ export function Onboarding() {
       dailyStepGoal: 11000,
       occupation: "Principal Engineer",
       workoutDaysPerWeek: 5,
+      availableWorkoutTime: 60,
       medicalConditions: "None",
       injuries: "Shoulder impingement risk",
       foodPreference: "both",
@@ -531,6 +533,17 @@ export function Onboarding() {
                           { label: "Home (Limited setup)", value: "home" },
                           { label: "Both (Hybrid split)", value: "both" }
                         ]}
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-[var(--foreground-muted)] uppercase tracking-wide block">Available Workout Time (min)</label>
+                      <Input
+                        type="number"
+                        min={5}
+                        max={120}
+                        value={formData.availableWorkoutTime || ""}
+                        onChange={(e) => handleSelect("availableWorkoutTime", parseInt(e.target.value))}
                       />
                     </div>
 

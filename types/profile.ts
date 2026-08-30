@@ -31,6 +31,8 @@ export interface ClientProfile {
   dailyStepGoal: number;
   occupation: string;
   workoutDaysPerWeek: number;
+  /** Usual time available for a single workout. Used by the adaptive planner. */
+  availableWorkoutTime?: number;
   medicalConditions: string;
   injuries: string;
   foodPreference: FoodPreference;

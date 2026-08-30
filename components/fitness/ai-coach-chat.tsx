@@ -20,7 +20,15 @@ import { motion, AnimatePresence } from "framer-motion";
 export function AICoachChat() {
   const { chatHistory, addMessage } = useFitness();
   const [inputText, setInputText] = useState("");
+  const [aiHealth, setAiHealth] = useState<{ status: string; model: string; ollama: boolean } | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    fetch("/api/ai/health?init=true")
+      .then((res) => res.json())
+      .then((data) => setAiHealth(data))
+      .catch(() => setAiHealth({ status: "unavailable", model: "gemma3:4b", ollama: false }));
+  }, []);
 
   const handleSend = (text: string) => {
     if (!text.trim()) return;
@@ -57,12 +65,36 @@ export function AICoachChat() {
           </div>
           <div>
             <h2 className="font-bold text-white text-sm">Elite AI Fitness Coach</h2>
-            <p className="text-[10px] text-white/50 leading-none">Context-Aware Sports Science & Nutrition Engine</p>
+            <p className="text-[10px] text-white/50 leading-none">
+              {aiHealth?.ollama && aiHealth?.status === "ready"
+                ? `Powered by Ollama (${aiHealth.model}) Local LLM`
+                : "Context-Aware Sports Science & Nutrition Engine"}
+            </p>
           </div>
         </div>
-        <div className="flex items-center gap-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider animate-pulse">
-          <div className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-          Online & Streaming
+        <div
+          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider ${
+            aiHealth?.ollama && aiHealth?.status === "ready"
+              ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30"
+              : aiHealth?.status === "model_missing"
+              ? "bg-amber-500/15 text-amber-300 border border-amber-500/30"
+              : "bg-cyan-500/15 text-cyan-300 border border-cyan-500/30"
+          }`}
+        >
+          <div
+            className={`h-1.5 w-1.5 rounded-full ${
+              aiHealth?.ollama && aiHealth?.status === "ready"
+                ? "bg-emerald-400 animate-pulse"
+                : aiHealth?.status === "model_missing"
+                ? "bg-amber-400"
+                : "bg-cyan-400"
+            }`}
+          />
+          {aiHealth?.ollama && aiHealth?.status === "ready"
+            ? `⚡ ${aiHealth.model} Ready`
+            : aiHealth?.status === "model_missing"
+            ? "⚠️ Model Missing"
+            : "🛡️ Sports Science Engine"}
         </div>
       </div>
 
