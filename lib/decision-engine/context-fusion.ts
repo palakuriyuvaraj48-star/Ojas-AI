@@ -230,7 +230,7 @@ export function fuseContext(inputs: ContextFusionInputs): CurrentContext {
     isExamPeriod: isExam,
     availableTimeMinutes: availableTime,
     equipmentAvailable: equipment,
-    workoutLocation: twin.lifestyle.workoutEnvironment || "home",
+    workoutLocation: (twin.lifestyle.workoutEnvironment === "both" ? "home" : twin.lifestyle.workoutEnvironment) || "home",
     travelStatus: constraintOverrides?.travelStatus ?? twin.lifestyle.travelStatus ?? "home",
 
     dailyBudgetINR: budget,

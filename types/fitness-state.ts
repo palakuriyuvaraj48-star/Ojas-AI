@@ -1,6 +1,6 @@
 import { ClientProfile, DailyLog, FitnessGoal, FoodPreference, IndianLifestyleRole } from "./profile";
 
-export type OjasDecisionAction = "TRAIN" | "REDUCE_INTENSITY" | "RECOVER";
+export type OjasDecisionAction = "TRAIN" | "REDUCE_INTENSITY" | "RECOVER" | "FULL_TRAINING" | "REDUCED_TRAINING" | "MINIMUM_TRAINING" | "SPORT_PRACTICE" | "RECOVERY" | "MOBILITY" | "REST" | "NUTRITION_ACTION" | "SLEEP_PRIORITY";
 
 export interface EnvironmentalContext {
   temperatureC?: number;
@@ -85,9 +85,9 @@ export interface DailyPriority {
 }
 
 export interface DailyDecision {
-  action: OjasDecisionAction; // "TRAIN" | "REDUCE_INTENSITY" | "RECOVER"
-  badgeColor: "green" | "yellow" | "blue";
-  headline: string; // e.g. "35-minute Upper Body + Core"
+  action: OjasDecisionAction;
+  badgeColor: "green" | "yellow" | "blue" | "rose" | "purple";
+  headline: string;
   subtitle: string;
   whyReasons: string[];
   basedOn: {

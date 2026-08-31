@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { FitnessProvider } from "@/components/providers/fitness-provider";
+import { OjasProvider } from "@/components/providers/ojas-provider";
 import { MusicProvider } from "@/components/providers/music-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
 import { AuthProvider } from "@/providers/auth-provider";
@@ -24,9 +25,11 @@ export default function RootLayout({
           <AuthProvider>
             <ToastProvider>
               <FitnessProvider>
-                <I18nProvider>
-                  <MusicProvider>{children}</MusicProvider>
-                </I18nProvider>
+                <OjasProvider>
+                  <I18nProvider>
+                    <MusicProvider>{children}</MusicProvider>
+                  </I18nProvider>
+                </OjasProvider>
               </FitnessProvider>
             </ToastProvider>
           </AuthProvider>

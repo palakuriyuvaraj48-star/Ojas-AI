@@ -1,30 +1,34 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useFitness } from "@/components/providers/fitness-provider";
+import { useOjas, useDailyDecision, useRecoveryState, useRiskState } from "@/components/providers/ojas-provider";
 import { GlassCard } from "@/components/ui/glass-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Sparkles, 
-  CheckCircle2, 
-  Clock, 
-  Apple, 
-  Plus, 
-  Camera, 
-  Building2, 
+import {
+  Sparkles,
+  CheckCircle2,
+  Clock,
+  Apple,
+  Plus,
+  Camera,
+  Building2,
   DollarSign,
   ShieldCheck,
   Zap,
-  Waves
+  Waves,
+  AlertTriangle,
+  HeartPulse,
+  Activity,
 } from "lucide-react";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import Link from "next/link";
 import { DailyDecisionCard } from "@/components/fitness/daily-decision-card";
 import { OjasScoreSummary } from "@/components/fitness/ojas-score-summary";
 import { SportJourneyCard } from "@/components/fitness/sport-journey-card";
-import { buildUnifiedFitnessState, computeOjasDailyDecision } from "@/lib/decision-engine";
+import { ojasDecisionToLegacy } from "@/lib/ojas-state/compatibility";
 import { useTranslation } from "@/lib/i18n";
 
 export function DashboardView() {
@@ -39,6 +43,10 @@ export function DashboardView() {
     logWater,
   } = useFitness();
 
+  const { state: ojasState, decision: ojasDecision, initializeState, emitEvent } = useOjas();
+  const recoveryState = useRecoveryState();
+  const riskState = useRiskState();
+
   const { t } = useTranslation();
 
   const [availableTime, setAvailableTime] = useState<number>(profile?.availableWorkoutTime || 35);
@@ -49,6 +57,50 @@ export function DashboardView() {
   const [showLogModal, setShowLogModal] = useState(false);
   const [logSuccessAlert, setLogSuccessAlert] = useState<string | null>(null);
 
+  // Initialize Ojas state when profile changes
+  useEffect(() => {
+    if (profile && !ojasState.lastEvent) {
+      initializeState(profile, dailyLog);
+    }
+  }, [profile, dailyLog, initializeState, ojasState.lastEvent]);
+
+  // Emit events when context changes
+  useEffect(() => {
+    if (profile && ojasState.lastEvent) {
+      emitEvent({
+        id: `evt_time_${Date.now()}`,
+        type: "TIME_CONSTRAINT_CHANGED",
+        timestamp: new Date().toISOString(),
+        payload: { minutes: availableTime },
+        source: "user_input",
+      });
+    }
+  }, [availableTime]);
+
+  useEffect(() => {
+    if (profile && ojasState.lastEvent) {
+      emitEvent({
+        id: `evt_stress_${Date.now()}`,
+        type: "STRESS_CHANGED",
+        timestamp: new Date().toISOString(),
+        payload: { level: energyState === "tired" ? "high" : energyState === "moderate" ? "medium" : "low" },
+        source: "user_input",
+      });
+    }
+  }, [energyState]);
+
+  useEffect(() => {
+    if (profile && ojasState.lastEvent) {
+      emitEvent({
+        id: `evt_hostel_${Date.now()}`,
+        type: "PROFILE_UPDATED",
+        timestamp: new Date().toISOString(),
+        payload: { isHostelMode },
+        source: "user_input",
+      });
+    }
+  }, [isHostelMode]);
+
   if (!profile || !calorieTargets || !macroTargets) {
     return (
       <div className="flex h-64 items-center justify-center">
@@ -57,27 +109,13 @@ export function DashboardView() {
     );
   }
 
-  // Compute live unified fitness state and today's decision
-  const unifiedState = buildUnifiedFitnessState(
-    {
-      ...profile,
-      availableWorkoutTime: availableTime,
-      isHostelMode,
-      stressLevel: energyState === "tired" ? "high" : energyState === "moderate" ? "medium" : "low",
-    },
-    dailyLog,
-    logsHistory
-  );
-
-  const dailyDecision = computeOjasDailyDecision(unifiedState);
-
   const calRemaining = Math.max(0, calorieTargets.activeTarget - dailyLog.caloriesConsumed);
   const calPercent = Math.min(100, Math.round((dailyLog.caloriesConsumed / calorieTargets.activeTarget) * 100)) || 0;
   const protPercent = Math.min(100, Math.round((dailyLog.proteinConsumed / macroTargets.protein.grams) * 100)) || 0;
   const carbPercent = Math.min(100, Math.round((dailyLog.carbsConsumed / macroTargets.carbs.grams) * 100)) || 0;
   const fatPercent = Math.min(100, Math.round((dailyLog.fatConsumed / macroTargets.fat.grams) * 100)) || 0;
 
-  // 7-day trend chart data
+  // 7-day trend chart data - uses canonical Ojas state
   const weekData = [
     { day: "Mon", score: 78, recovery: 78, protein: 110 },
     { day: "Tue", score: 82, recovery: 82, protein: 125 },
@@ -85,7 +123,7 @@ export function DashboardView() {
     { day: "Thu", score: 89, recovery: 89, protein: 130 },
     { day: "Fri", score: 86, recovery: 86, protein: 120 },
     { day: "Sat", score: 92, recovery: 92, protein: 140 },
-    { day: "Sun", score: 88, recovery: unifiedState.recovery.recoveryScore, protein: dailyLog.proteinConsumed },
+    { day: "Sun", score: 88, recovery: ojasState.recovery.recoveryScore, protein: dailyLog.proteinConsumed },
   ];
 
   const handleFoodSubmit = (e: React.FormEvent) => {
@@ -188,7 +226,7 @@ export function DashboardView() {
 
       {/* HERO SECTION 1: OJAS DAILY DECISION */}
       <DailyDecisionCard
-        decision={dailyDecision}
+        decision={ojasDecisionToLegacy(ojasDecision)}
         onStartPlan={handleStartWorkout}
         onQuickLogWater={handleQuickWater}
         onNavigate={(href) => {
@@ -203,7 +241,7 @@ export function DashboardView() {
       <OjasScoreSummary
         movementScore={92}
         nutritionScore={84}
-        recoveryScore={unifiedState.recovery.recoveryScore}
+        recoveryScore={ojasState.recovery.recoveryScore}
         consistencyScore={94}
         onNavigate={(tab) => {
           window.location.href = tab;
@@ -297,7 +335,7 @@ export function DashboardView() {
             <Sparkles className="h-4 w-4 text-[#adc6ff] shrink-0 mt-0.5" />
             <div>
               <strong className="text-white font-semibold">{t("dashboard_decision_engine", "Ojas Pacing Advice")}: </strong>
-              {dailyDecision.suggestedNutritionAction.recommendation}
+              {ojasDecision.nutrition?.recommendation || "Log your meals to get personalized nutrition guidance."}
             </div>
           </div>
         </GlassCard>

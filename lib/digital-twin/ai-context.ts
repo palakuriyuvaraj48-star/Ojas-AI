@@ -103,7 +103,7 @@ export function buildDigitalTwinAIContext(
     sleep: {
       duration_hours: twin.recovery?.sleepDuration ?? profile?.sleepDuration ?? null,
       quality: twin.recovery?.sleepQuality ?? null,
-      trend: twin.recovery?.hrvTrend ?? null,
+      trend: null,
     },
     nutrition: {
       calories: twin.nutrition?.averageCaloriesConsumed || latestLog?.caloriesConsumed || null,

@@ -2,17 +2,17 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Sparkles, 
-  Dumbbell, 
-  Apple, 
-  Waves, 
-  Moon, 
-  ArrowRight, 
-  HelpCircle, 
-  CheckCircle2, 
-  Clock, 
-  ChevronDown, 
+import {
+  Sparkles,
+  Dumbbell,
+  Apple,
+  Waves,
+  Moon,
+  ArrowRight,
+  HelpCircle,
+  CheckCircle2,
+  Clock,
+  ChevronDown,
   ChevronUp,
   Play
 } from "lucide-react";
@@ -39,6 +39,7 @@ export function DailyDecisionCard({
   const getActionBadge = (action: OjasDecisionAction) => {
     switch (action) {
       case "TRAIN":
+      case "FULL_TRAINING":
         return {
           icon: "🟢",
           label: t("dashboard_train_badge", "TRAIN"),
@@ -46,6 +47,9 @@ export function DailyDecisionCard({
           glow: "from-emerald-500/20 to-teal-500/5",
         };
       case "REDUCE_INTENSITY":
+      case "REDUCED_TRAINING":
+      case "MINIMUM_TRAINING":
+      case "SPORT_PRACTICE":
         return {
           icon: "🟡",
           label: t("dashboard_reduce_badge", "REDUCE INTENSITY"),
@@ -53,16 +57,45 @@ export function DailyDecisionCard({
           glow: "from-amber-500/20 to-yellow-500/5",
         };
       case "RECOVER":
+      case "RECOVERY":
+      case "REST":
+      case "SLEEP_PRIORITY":
         return {
           icon: "🔵",
           label: t("dashboard_recover_badge", "RECOVER"),
           bg: "bg-blue-500/15 border-blue-500/30 text-blue-300",
           glow: "from-blue-500/20 to-indigo-500/5",
         };
+      case "MOBILITY":
+        return {
+          icon: "🟣",
+          label: "MOBILITY",
+          bg: "bg-purple-500/15 border-purple-500/30 text-purple-300",
+          glow: "from-purple-500/20 to-indigo-500/5",
+        };
+      case "NUTRITION_ACTION":
+        return {
+          icon: "🍎",
+          label: "NUTRITION",
+          bg: "bg-orange-500/15 border-orange-500/30 text-orange-300",
+          glow: "from-orange-500/20 to-yellow-500/5",
+        };
+      default:
+        return {
+          icon: "🟢",
+          label: t("dashboard_train_badge", "TRAIN"),
+          bg: "bg-emerald-500/15 border-emerald-500/30 text-emerald-300",
+          glow: "from-emerald-500/20 to-teal-500/5",
+        };
     }
   };
 
   const badge = getActionBadge(decision.action);
+
+  // Handle both string and number confidence formats
+  const confidenceDisplay = typeof decision.confidence === "number"
+    ? `${decision.confidence}%`
+    : decision.confidence;
 
   return (
     <GlassCard className="relative overflow-hidden p-6 border-white/15 bg-gradient-to-b from-[#181a20] to-[#121316] shadow-2xl" glow>
@@ -78,7 +111,7 @@ export function DailyDecisionCard({
               {t("dashboard_decision_engine", "Ojas Decision Engine")}
             </span>
             <span className="rounded-full bg-white/10 px-2 py-0.5 text-[9px] text-white/60 font-medium">
-              {decision.confidence}
+              {confidenceDisplay}
             </span>
           </div>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
