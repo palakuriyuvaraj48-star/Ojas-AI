@@ -7,7 +7,6 @@ export * from "./ai-context";
 export {
   createInitialTwin,
   updateTwinFromLogs,
-  applyScenarioToTwin,
-  applyScenarioToTwin as applyScenario,
+  applyScenario,
   compareTwins,
 } from "./engine";

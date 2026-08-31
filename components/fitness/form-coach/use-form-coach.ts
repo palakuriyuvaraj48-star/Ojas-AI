@@ -32,6 +32,7 @@ import {
   type FormScore,
   type MovementPhase,
 } from "@/lib/vision";
+import { applyEventToTwin } from "@/lib/digital-twin/engine";
 
 const initialPreferences: CameraPreferences = {
   facingMode: "user",
@@ -409,10 +410,30 @@ export function useFormCoach() {
       /* local storage bridge already synced */
     }
 
+    try {
+      const storedTwinStr = localStorage.getItem("ojas_digital_twin_v2");
+      if (storedTwinStr) {
+        const storedTwin = JSON.parse(storedTwinStr);
+        const { updatedTwin } = applyEventToTwin(storedTwin, {
+          id: `evt_vis_${Date.now()}`,
+          type: "FORM_SCORE_UPDATED",
+          userId: storedTwin.userId || "ojas_user",
+          timestamp: new Date().toISOString(),
+          payload: {
+            formScore: record.formScore,
+            exercise: exercise.name,
+          },
+        });
+        localStorage.setItem("ojas_digital_twin_v2", JSON.stringify(updatedTwin));
+      }
+    } catch {
+      /* local storage bridge synced */
+    }
+
     refreshData();
     setSaving(false);
     setWorkoutCompleteSummary(record);
-    announce(`Workout recorded. Digital Twin updated with ${record.reps} reps.`);
+    announce(`Workout recorded. Digital Twin updated with ${record.reps} reps and Form Score of ${record.formScore}%.`);
     return record;
   }, [
     finishedSets,

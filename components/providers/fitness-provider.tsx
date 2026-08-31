@@ -17,8 +17,21 @@ import {
 } from "@/lib/coach";
 import { buildSignals, computeRecovery } from "@/lib/recovery";
 
+import { DigitalTwin, TwinEvent, TwinDelta } from "@/lib/digital-twin/types";
+import { createInitialTwin, applyEventToTwin } from "@/lib/digital-twin/engine";
+import { computeAdaptiveDecision, AdaptiveDecisionResult } from "@/lib/decision-engine/adaptive-decision-engine";
+import { processFeedbackAndLearn, SessionFeedback, FeedbackProcessingResult } from "@/lib/decision-engine/behavioral-learning";
+import { runWhatIfSimulation, SimulationScenario, SimulationResult } from "@/lib/simulation/what-if-engine";
+
 interface FitnessContextType {
   profile: ClientProfile | null;
+  digitalTwin: DigitalTwin;
+  twinHistory: DigitalTwin[];
+  twinDeltas: TwinDelta[];
+  dailyDecision: AdaptiveDecisionResult;
+  dispatchTwinEvent: (event: TwinEvent) => void;
+  submitSessionFeedback: (feedback: SessionFeedback) => FeedbackProcessingResult;
+  runSimulation: (scenario: SimulationScenario) => SimulationResult;
   dailyLog: DailyLog;
   logsHistory: DailyLog[];
   checkInHistory: WeeklyCheckIn[];
@@ -110,6 +123,9 @@ const demoProfile: ClientProfile = {
 
 export function FitnessProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfileState] = useState<ClientProfile | null>(demoProfile);
+  const [digitalTwin, setDigitalTwin] = useState<DigitalTwin>(() => createInitialTwin(demoProfile));
+  const [twinHistory, setTwinHistory] = useState<DigitalTwin[]>([]);
+  const [twinDeltas, setTwinDeltas] = useState<TwinDelta[]>([]);
   const [isOnboarded, setIsOnboarded] = useState<boolean>(true);
   const [logsHistory, setLogsHistory] = useState<DailyLog[]>([]);
   const [checkInHistory, setCheckInHistory] = useState<WeeklyCheckIn[]>([]);
@@ -327,6 +343,18 @@ export function FitnessProvider({ children }: { children: React.ReactNode }) {
   // Load from local storage
   useEffect(() => {
     try {
+      const storedTwin = localStorage.getItem("ojas_digital_twin_v2");
+      if (storedTwin) {
+        try {
+          const parsed = JSON.parse(storedTwin);
+          if (parsed && typeof parsed === "object") {
+            setDigitalTwin(parsed);
+          }
+        } catch {
+          // ignore
+        }
+      }
+
       const storedProfile = localStorage.getItem("lumina_profile");
       const storedLogs = localStorage.getItem("lumina_logs");
       const storedCheckIns = localStorage.getItem("lumina_checkins");
@@ -510,6 +538,44 @@ export function FitnessProvider({ children }: { children: React.ReactNode }) {
     saveDailyLog(updated);
   };
 
+  const dispatchTwinEvent = (event: TwinEvent) => {
+    setDigitalTwin((prev) => {
+      const { updatedTwin, delta } = applyEventToTwin(prev, event);
+      try {
+        localStorage.setItem("ojas_digital_twin_v2", JSON.stringify(updatedTwin));
+      } catch (e) {
+        console.error("Error saving digital twin", e);
+      }
+      setTwinDeltas((d) => [delta, ...d].slice(0, 20));
+      setTwinHistory((h) => [updatedTwin, ...h].slice(0, 20));
+      return updatedTwin;
+    });
+  };
+
+  const submitSessionFeedback = (feedback: SessionFeedback): FeedbackProcessingResult => {
+    let result: FeedbackProcessingResult = {
+      updatedTwin: digitalTwin,
+      learnedInsights: [],
+      nextDayAdjustment: "Proceed with scheduled plan",
+    };
+    setDigitalTwin((prev) => {
+      result = processFeedbackAndLearn(prev, feedback);
+      try {
+        localStorage.setItem("ojas_digital_twin_v2", JSON.stringify(result.updatedTwin));
+      } catch (e) {
+        console.error("Error saving digital twin after feedback", e);
+      }
+      return result.updatedTwin;
+    });
+    return result;
+  };
+
+  const runSimulation = (scenario: SimulationScenario): SimulationResult => {
+    return runWhatIfSimulation(digitalTwin, profile, scenario);
+  };
+
+  const dailyDecision = computeAdaptiveDecision(digitalTwin, profile, dailyLog, logsHistory);
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const completeWorkout = (duration: number, _id: string) => {
     const updated = {
@@ -518,6 +584,16 @@ export function FitnessProvider({ children }: { children: React.ReactNode }) {
       workoutDuration: dailyLog.workoutDuration + duration,
     };
     saveDailyLog(updated);
+    dispatchTwinEvent({
+      id: `evt_wo_${Date.now()}`,
+      type: "WORKOUT_COMPLETED",
+      userId: profile?.name || "ojas_user",
+      timestamp: new Date().toISOString(),
+      payload: {
+        durationMinutes: duration,
+        formScore: 90,
+      },
+    });
     setActiveWorkout((prev) => ({
       ...prev,
       completedExercises: [],
@@ -944,6 +1020,13 @@ export function FitnessProvider({ children }: { children: React.ReactNode }) {
     <FitnessContext.Provider
       value={{
         profile,
+        digitalTwin,
+        twinHistory,
+        twinDeltas,
+        dailyDecision,
+        dispatchTwinEvent,
+        submitSessionFeedback,
+        runSimulation,
         dailyLog,
         logsHistory,
         checkInHistory,

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { buildUnifiedFitnessState, computeOjasDailyDecision } from "@/lib/decision-engine";
+import { computeAdaptiveDecision } from "@/lib/decision-engine/adaptive-decision-engine";
+import { createInitialTwin } from "@/lib/digital-twin/engine";
 import { ClientProfile, DailyLog } from "@/types/profile";
 
 export async function GET(request: Request) {
@@ -7,6 +8,7 @@ export async function GET(request: Request) {
   const availableTime = parseInt(searchParams.get("availableTime") || "35");
   const mood = searchParams.get("mood") || "energetic";
   const isHostel = searchParams.get("isHostel") === "true";
+  const scenario = searchParams.get("scenario");
 
   // Standard Indian athlete demo profile
   const demoProfile: ClientProfile = {
@@ -39,6 +41,16 @@ export async function GET(request: Request) {
     language: "en",
   };
 
+  // Create Digital Twin
+  let twin = createInitialTwin(demoProfile, "demo_user");
+
+  // Apply scenario if provided (for demo/testing)
+  if (scenario) {
+    const { applyScenario } = await import("@/lib/digital-twin/engine");
+    const scenarioResult = applyScenario(twin, { type: scenario });
+    twin = scenarioResult.updatedTwin;
+  }
+
   const demoDailyLog: DailyLog = {
     date: new Date().toISOString().split("T")[0],
     caloriesConsumed: 1340,
@@ -59,59 +71,125 @@ export async function GET(request: Request) {
     { date: "2026-08-29", caloriesConsumed: 1980, proteinConsumed: 105, carbsConsumed: 210, fatConsumed: 48, waterConsumed: 2.5, stepsCount: 8200, workoutCompleted: false, workoutDuration: 0 },
   ];
 
-  const unifiedState = buildUnifiedFitnessState(demoProfile, demoDailyLog, logsHistory, {
-    lifestyle: {
-      role: demoProfile.lifestyleRole || "college-student",
-      availableTimeMinutes: availableTime,
-      exerciseLocation: "home",
-      equipmentAvailable: demoProfile.availableEquipment,
-      travelStatus: "hostel",
-    },
-  });
+  // Use the new Adaptive Decision Engine
+  const adaptiveDecision = computeAdaptiveDecision(twin, demoProfile, demoDailyLog, logsHistory);
 
-  const dailyDecision = computeOjasDailyDecision(unifiedState);
-
+  // Map Adaptive Decision to legacy format for backward compatibility
   const responseData = {
     status: "success",
     isPrototypeEstimate: true,
-    decision: dailyDecision,
-    ojasScores: {
-      composite: 88,
-      movement: 92,
-      nutrition: 84,
-      recovery: unifiedState.recovery.recoveryScore,
-      consistency: 94,
+    decision: {
+      action: adaptiveDecision.action as any,
+      badgeColor: adaptiveDecision.badge.color,
+      headline: adaptiveDecision.headline,
+      subtitle: adaptiveDecision.subtitle,
+      whyReasons: adaptiveDecision.whyReasons,
+      basedOn: {
+        recoveryScore: adaptiveDecision.decisionFactors.find(f => f.signal === "Recovery Score")?.observedValue as number || 75,
+        sleepHours: adaptiveDecision.decisionFactors.find(f => f.signal === "Sleep Duration")?.observedValue as number || 7.5,
+        trainingLoad: adaptiveDecision.safetyAssessment.riskLevel === "ELEVATED" ? "Elevated" : "Balanced",
+        availableTime: adaptiveDecision.decisionFactors.find(f => f.signal === "Available Time")?.observedValue as number || 35,
+        fatigueFocus: "Systemic Low",
+        environmentText: `${twin.environment.temperatureC || 30}°C (${twin.environment.condition || "Moderate"})`,
+        primaryGoal: demoProfile.goal,
+      },
+      priorities: [
+        {
+          icon: "🏋️",
+          category: "workout",
+          title: adaptiveDecision.suggestedWorkout.title,
+          description: `${adaptiveDecision.suggestedWorkout.intensity} intensity • ${adaptiveDecision.suggestedWorkout.durationMinutes} mins`,
+          actionText: "Start Workout",
+          actionHref: "/workout",
+        },
+        {
+          icon: "🍛",
+          category: "nutrition",
+          title: adaptiveDecision.suggestedNutrition.headline,
+          description: `Target ${adaptiveDecision.suggestedNutrition.targetProteinGrams}g protein`,
+          actionText: "View Nutrition",
+          actionHref: "/food",
+        },
+        {
+          icon: "💧",
+          category: "hydration",
+          title: `${demoProfile.waterIntake || 3}L Hydration Target`,
+          description: "Keep a water bottle handy for steady sips",
+        },
+        {
+          icon: "😴",
+          category: "recovery",
+          title: `${Math.round(demoProfile.sleepDuration)}h Sleep Target`,
+          description: `Aim for bedtime at ${demoProfile.sleepTime || "10:30 PM"}`,
+          actionText: "Recovery Protocols",
+          actionHref: "/recovery",
+        },
+      ],
+      confidence: adaptiveDecision.confidenceScore >= 80 ? "High" : "Moderate estimate",
+      suggestedWorkout: adaptiveDecision.suggestedWorkout,
+      suggestedNutritionAction: {
+        headline: adaptiveDecision.suggestedNutrition.headline,
+        recommendation: adaptiveDecision.suggestedNutrition.recommendation,
+        affordableProteinHack: adaptiveDecision.suggestedNutrition.practicalMealSuggestions[0]?.name || "Eggs + Dal",
+        estimatedCostINR: adaptiveDecision.suggestedNutrition.dailyBudgetINR,
+      },
+      recoveryAction: {
+        headline: adaptiveDecision.safetyAssessment.isDeloadMandated ? "Active Recovery" : "Post-Workout Mobility",
+        protocol: adaptiveDecision.safetyAssessment.mitigationActions.join(", ") || "5 min dynamic stretch",
+        mobilityMinutes: 5,
+      },
     },
-    state: unifiedState,
+    ojasScores: {
+      composite: Math.round((twin.dataQuality + adaptiveDecision.confidenceScore) / 2),
+      movement: twin.physical.formQualityScore,
+      nutrition: twin.nutrition.macroAdherence.protein,
+      recovery: Math.round(twin.recovery.recoveryScore),
+      consistency: twin.behavioral.workoutConsistency,
+    },
+    twin: {
+      state: twin.state,
+      dataQuality: twin.dataQuality,
+      recovery: twin.recovery,
+      lifestyle: twin.lifestyle,
+    },
+    adaptiveDecision: {
+      action: adaptiveDecision.action,
+      badge: adaptiveDecision.badge,
+      confidenceScore: adaptiveDecision.confidenceScore,
+      twinCompleteness: adaptiveDecision.twinCompleteness,
+      decisionFactors: adaptiveDecision.decisionFactors,
+      safetyAssessment: adaptiveDecision.safetyAssessment,
+      environmentalAdvice: adaptiveDecision.environmentalAdvice,
+    },
     dailySummary: {
       greeting: `Namaste, ${demoProfile.name}`,
-      recoveryScore: unifiedState.recovery.recoveryScore,
-      recommendationSummary: `Today's Ojas Decision: ${dailyDecision.action} (${dailyDecision.headline})`,
-      aiConfidence: dailyDecision.confidence,
+      recoveryScore: Math.round(twin.recovery.recoveryScore),
+      recommendationSummary: `Today's Ojas Decision: ${adaptiveDecision.action} (${adaptiveDecision.headline})`,
+      aiConfidence: adaptiveDecision.confidenceScore >= 80 ? "High" : "Moderate",
     },
     workout: {
-      title: dailyDecision.suggestedWorkout.title,
-      duration: dailyDecision.suggestedWorkout.durationMinutes,
-      intensity: dailyDecision.suggestedWorkout.intensity,
-      focus: dailyDecision.suggestedWorkout.focus,
-      exercises: dailyDecision.suggestedWorkout.exercises,
-      explanation: dailyDecision.whyReasons.join(" "),
+      title: adaptiveDecision.suggestedWorkout.title,
+      duration: adaptiveDecision.suggestedWorkout.durationMinutes,
+      intensity: adaptiveDecision.suggestedWorkout.intensity,
+      focus: adaptiveDecision.suggestedWorkout.focus,
+      exercises: adaptiveDecision.suggestedWorkout.exercises,
+      explanation: adaptiveDecision.whyReasons.join(" "),
     },
     nutrition: {
-      calories: unifiedState.nutrition.calorieTarget,
-      protein: unifiedState.nutrition.proteinTarget,
-      budget: demoProfile.dailyFoodBudget,
-      isHostelMode: unifiedState.nutrition.isHostelMode,
-      recommendation: dailyDecision.suggestedNutritionAction.recommendation,
-      proteinHack: dailyDecision.suggestedNutritionAction.affordableProteinHack,
+      calories: adaptiveDecision.suggestedNutrition.targetCalories,
+      protein: adaptiveDecision.suggestedNutrition.targetProteinGrams,
+      budget: adaptiveDecision.suggestedNutrition.dailyBudgetINR,
+      isHostelMode: twin.nutrition.isHostelMode,
+      recommendation: adaptiveDecision.suggestedNutrition.recommendation,
+      proteinHack: adaptiveDecision.suggestedNutrition.practicalMealSuggestions[0]?.name || "",
     },
     recovery: {
-      score: unifiedState.recovery.recoveryScore,
-      sleepHours: unifiedState.recovery.sleepHours,
-      readinessZone: unifiedState.recovery.readinessZone,
-      action: dailyDecision.recoveryAction.protocol,
+      score: Math.round(twin.recovery.recoveryScore),
+      sleepHours: twin.recovery.sleepDuration,
+      readinessZone: twin.recovery.readiness,
+      action: adaptiveDecision.safetyAssessment.mitigationActions[0] || "Standard recovery",
     },
-    environment: unifiedState.environment,
+    environment: twin.environment,
     safetyDisclaimer: "This is general adaptive fitness guidance. If you have an injury, medical condition, or feel sudden dizziness, rest and consult a healthcare professional.",
   };
 
