@@ -184,8 +184,8 @@ export function NutritionDashboard({ onNavigate }: { onNavigate?: (tab: string) 
               BMR = 10 × weight (kg) + 6.25 × height (cm) - 5 × age (y) {profile.gender === "male" ? "+ 5" : "- 161"} = {Math.round(profile.gender === "male" ? (10 * profile.weight + 6.25 * profile.height - 5 * profile.age + 5) : (10 * profile.weight + 6.25 * profile.height - 5 * profile.age - 161))} kcal
             </div>
             <p>
-              This is scaled by your activity level (**{profile.activityLevel.replace("-", " ")}**) to find your **TDEE** (Maintenance: {calorieTargets.maintenance} kcal).
-              Finally, we apply a goal offset for **{profile.goal.replace("-", " ")}** to yield **{calorieTargets.activeTarget} kcal**.
+              This is scaled by your activity level (**{(profile.activityLevel || "moderately-active").replace(/-/g, " ")}**) to find your **TDEE** (Maintenance: {calorieTargets.maintenance} kcal).
+              Finally, we apply a goal offset for (**{(profile.goal || "fat-loss").replace(/-/g, " ")}**) to yield **{calorieTargets.activeTarget} kcal**.
             </p>
           </div>
           <div className="space-y-2">

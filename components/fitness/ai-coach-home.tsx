@@ -88,13 +88,14 @@ export function AICoachHome({ setActiveTab }: AICoachHomeProps) {
   };
 
   // Determine personalized advice
-  const getGoalLabel = (g: string) => {
+  const getGoalLabel = (g?: string) => {
+    if (!g) return "General Fitness";
     return g.split("-").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
   };
 
   const advice = {
     workout: {
-      title: score >= 65 ? `${getGoalLabel(profile.goal)} Training` : "Mobility & Restoration",
+      title: score >= 65 ? `${getGoalLabel(profile?.goal)} Training` : "Mobility & Restoration",
       why: score >= 65 
         ? `Your recovery is at ${score}/100. Muscles are primed for progressive overload, specifically targeting ${profile.gymExperience} volumes.` 
         : `Your recovery is low (${score}/100). High loading today will drive cortisol levels up and delay recovery.`,

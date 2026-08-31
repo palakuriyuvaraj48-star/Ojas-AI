@@ -2,9 +2,48 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Dumbbell, ArrowRight, ArrowLeft, Check, Sparkles, User, Flame, Activity, Heart, Camera, Calendar, MapPin, Bell, ShieldCheck, Moon, Sun, Monitor, Ruler, Sparkle } from "lucide-react";
+import { 
+  Dumbbell, 
+  ArrowRight, 
+  ArrowLeft, 
+  Check, 
+  Sparkles, 
+  User, 
+  Flame, 
+  Activity, 
+  Heart, 
+  Camera, 
+  Calendar, 
+  MapPin, 
+  Bell, 
+  ShieldCheck, 
+  Moon, 
+  Sun, 
+  Monitor, 
+  Ruler, 
+  Sparkle,
+  Building2,
+  DollarSign,
+  Languages
+} from "lucide-react";
 import { useFitness } from "@/components/providers/fitness-provider";
-import { ClientProfile, Gender, FitnessGoal, ActivityLevel, GymExperience, FoodPreference, Budget, StressLevel, WorkoutEnvironment, AIPersonality, ThemePreference, Language } from "@/types/profile";
+import { 
+  ClientProfile, 
+  Gender, 
+  FitnessGoal, 
+  ActivityLevel, 
+  GymExperience, 
+  FoodPreference, 
+  Budget, 
+  StressLevel, 
+  WorkoutEnvironment, 
+  AIPersonality, 
+  ThemePreference, 
+  Language,
+  IndianLifestyleRole,
+  FoodEnvironment
+} from "@/types/profile";
+import { SPORT_REGISTRY } from "@/lib/sports";
 import { GlassCard } from "@/components/ui/glass-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,36 +61,22 @@ interface Permission {
 const permissionsList: Permission[] = [
   {
     id: "camera",
-    title: "Camera Access",
-    description: "Required for the AI Vision Lens to run real-time posture analysis, track joint angles, and audit exercise depths.",
+    title: "Camera Access (Local Vision)",
+    description: "Required for the Smart Form Coach to run real-time posture analysis, rep counting, and joint angles locally in your browser.",
     icon: Camera,
     required: true,
   },
   {
     id: "health",
-    title: "Health & Fitness App Permissions",
-    description: "Allows syncing step counts, sleep latency, and heart rate recovery baselines from devices like Apple Watch and WHOOP.",
+    title: "Health & Fitness Telemetry",
+    description: "Allows syncing step counts, sleep latency, and heart rate baselines from wearable devices and sensors.",
     icon: Heart,
     required: true,
   },
   {
-    id: "calendar",
-    title: "Calendar Scheduler Sync",
-    description: "Integrates workout times directly into your Google/Apple calendar to help build strict consistency habits.",
-    icon: Calendar,
-    required: false,
-  },
-  {
-    id: "location",
-    title: "Location Telemetry",
-    description: "Used to calibrate outdoor running velocity, compute elevations, and find nearby certified hybrid fitness gyms.",
-    icon: MapPin,
-    required: false,
-  },
-  {
     id: "notifications",
     title: "Smart Notification Alerts",
-    description: "Provides daily nutrient targets, hydration nudges, recovery warnings, and workout schedule changes.",
+    description: "Provides daily nutrient targets, hydration nudges, recovery warnings, and adaptive workout changes.",
     icon: Bell,
     required: true,
   },
@@ -64,33 +89,36 @@ export function Onboarding() {
   const [grantedPermissions, setGrantedPermissions] = useState<Set<string>>(new Set(["camera", "health", "notifications"]));
   
   const [formData, setFormData] = useState<Partial<ClientProfile>>({
-    name: "Maya Chen",
-    age: 28,
-    gender: "female",
-    height: 168,
-    weight: 64.2,
-    goal: "lean-bulk",
-    bodyFat: 22,
+    name: "Anil Kumar",
+    age: 22,
+    gender: "male",
+    height: 174,
+    weight: 68.5,
+    goal: "fat-loss",
+    bodyFat: 18,
     activityLevel: "moderately-active",
     gymExperience: "intermediate",
-    dailyStepGoal: 9000,
-    occupation: "Product Designer",
+    dailyStepGoal: 8500,
+    occupation: "College Student",
     workoutDaysPerWeek: 4,
-    availableWorkoutTime: 45,
+    availableWorkoutTime: 35,
     medicalConditions: "None",
     injuries: "None",
     foodPreference: "both",
     allergies: "None",
-    budget: "moderate",
-    sleepDuration: 7.5,
+    budget: "budget",
+    dailyFoodBudget: 100,
+    sleepDuration: 7.4,
     stressLevel: "medium",
-    availableEquipment: ["barbell", "dumbbell", "cables", "machines"],
-    lifestyle: "Active professional, high screen time.",
-    neckCircumference: 32,
-    legCircumference: 55,
-    targetWeight: 66,
+    availableEquipment: ["bodyweight", "dumbbell"],
+    lifestyle: "Hostel resident, busy college schedule",
+    lifestyleRole: "college-student",
+    foodEnvironment: "hostel-mess",
+    neckCircumference: 36,
+    legCircumference: 56,
+    targetWeight: 65,
     timelineWeeks: 12,
-    workoutEnvironment: "gym",
+    workoutEnvironment: "home",
     workoutTime: "07:30",
     wakeTime: "06:30",
     sleepTime: "22:30",
@@ -98,6 +126,10 @@ export function Onboarding() {
     language: "en",
     aiPersonality: "motivational",
     themePreference: "dark",
+    isHostelMode: true,
+    userMode: "general-fitness",
+    selectedSport: "football",
+    sportLevel: "foundation",
   });
 
   const nextStep = () => setStep((prev) => Math.min(prev + 1, 7));
@@ -113,22 +145,6 @@ export function Onboarding() {
       }
       return newSet;
     });
-  };
-
-  const nextPermission = () => {
-    if (permissionStep < permissionsList.length - 1) {
-      setPermissionStep((prev) => prev + 1);
-    } else {
-      setStep(7); // Complete screen
-    }
-  };
-
-  const prevPermission = () => {
-    if (permissionStep > 0) {
-      setPermissionStep((prev) => prev - 1);
-    } else {
-      setStep(5); // Go back to AI & Theme step
-    }
   };
 
   const handleSelect = (field: keyof ClientProfile, value: any) => {
@@ -147,47 +163,47 @@ export function Onboarding() {
 
   const loadDemo = () => {
     const demoProfile: ClientProfile = {
-      name: "Vikram Malhotra",
-      age: 32,
+      name: "Anil Kumar",
+      age: 22,
       gender: "male",
-      height: 180,
-      weight: 84.5,
-      goal: "muscle-gain",
-      bodyFat: 16.5,
-      activityLevel: "very-active",
-      gymExperience: "advanced",
-      dailyStepGoal: 11000,
-      occupation: "Principal Engineer",
-      workoutDaysPerWeek: 5,
-      availableWorkoutTime: 60,
+      height: 174,
+      weight: 68.5,
+      goal: "fat-loss",
+      bodyFat: 18.5,
+      activityLevel: "moderately-active",
+      gymExperience: "intermediate",
+      dailyStepGoal: 8500,
+      occupation: "College Student",
+      workoutDaysPerWeek: 4,
+      availableWorkoutTime: 35,
       medicalConditions: "None",
-      injuries: "Shoulder impingement risk",
+      injuries: "None",
       foodPreference: "both",
       allergies: "None",
-      budget: "premium",
-      sleepDuration: 8.0,
+      budget: "budget",
+      dailyFoodBudget: 100,
+      sleepDuration: 7.4,
       stressLevel: "medium",
-      availableEquipment: ["barbell", "dumbbell", "cables", "machines"],
-      lifestyle: "Hybrid setup, lots of walking.",
-      neckCircumference: 39,
-      legCircumference: 61,
-      targetWeight: 88,
-      timelineWeeks: 16,
-      workoutEnvironment: "both",
-      workoutTime: "18:30",
-      wakeTime: "06:00",
-      sleepTime: "22:00",
-      waterIntake: 4.0,
+      availableEquipment: ["bodyweight", "dumbbell"],
+      lifestyle: "Hostel living, college classes, mess food",
+      lifestyleRole: "college-student",
+      foodEnvironment: "hostel-mess",
+      workoutEnvironment: "home",
+      isHostelMode: true,
+      neckCircumference: 36,
+      legCircumference: 56,
+      targetWeight: 65,
+      timelineWeeks: 12,
       language: "en",
-      aiPersonality: "strict",
+      aiPersonality: "motivational",
       themePreference: "dark",
       permissions: {
         camera: true,
         health: true,
-        calendar: true,
+        calendar: false,
         notification: true,
         location: false,
-      }
+      },
     };
     setFormData(demoProfile);
     setStep(7);
@@ -200,7 +216,7 @@ export function Onboarding() {
       return;
     }
     if (step === 6) {
-      // Manage permissions confirmation and proceed
+      setStep(7);
       return;
     }
     
@@ -210,9 +226,9 @@ export function Onboarding() {
       permissions: {
         camera: grantedPermissions.has("camera"),
         health: grantedPermissions.has("health"),
-        calendar: grantedPermissions.has("calendar"),
+        calendar: false,
         notification: grantedPermissions.has("notifications"),
-        location: grantedPermissions.has("location"),
+        location: false,
       }
     } as ClientProfile);
   };
@@ -224,21 +240,21 @@ export function Onboarding() {
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-2xl rounded-[32px] border border-[var(--border)] bg-[var(--surface-elevated)] p-6 shadow-[var(--elevation-xl)] backdrop-blur-3xl sm:p-8"
       >
-        {/* App Title */}
+        {/* App Header */}
         <div className="flex items-center justify-between mb-8 border-b border-[var(--border-subtle)] pb-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--accent)] to-[var(--accent-strong)] text-white">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-[#adc6ff] to-[#4d8eff] text-[#131315]">
               <Dumbbell className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-[var(--foreground)] tracking-tight">Project Titan</p>
-              <p className="text-xs text-[var(--foreground-muted)]">AI Fitness Operating System</p>
+              <p className="text-sm font-bold text-white tracking-tight">Ojas AI</p>
+              <p className="text-xs text-white/50">India-First AI Fitness Operating System</p>
             </div>
           </div>
           <button
             type="button"
             onClick={loadDemo}
-            className="flex items-center gap-1.5 rounded-xl border border-[var(--accent)]/30 bg-[var(--accent-glow)] px-3.5 py-1.5 text-xs font-semibold text-[var(--accent)] hover:brightness-110 transition"
+            className="flex items-center gap-1.5 rounded-xl border border-[#adc6ff]/30 bg-[#adc6ff]/10 px-3.5 py-1.5 text-xs font-semibold text-[#adc6ff] hover:brightness-110 transition"
           >
             <Sparkles className="h-3 w-3" /> Quick Demo
           </button>
@@ -253,22 +269,22 @@ export function Onboarding() {
                   <div
                     className={`flex h-7 w-7 items-center justify-center rounded-full border transition text-xs font-bold ${
                       step >= s
-                        ? "border-[var(--accent)] bg-[var(--accent)] text-white"
+                        ? "border-[#4d8eff] bg-[#4d8eff] text-[#131315]"
                         : "border-[var(--border)] bg-[var(--surface)] text-[var(--foreground-muted)]"
                     }`}
                   >
                     {step > s ? <Check className="h-3.5 w-3.5" /> : s}
                   </div>
-                  <span className={`ml-2 text-[10px] font-semibold hidden md:inline ${step === s ? "text-[var(--foreground)]" : "text-[var(--foreground-muted)]"}`}>
-                    {s === 1 && "Basic"}
+                  <span className={`ml-2 text-[10px] font-semibold hidden md:inline ${step === s ? "text-white" : "text-white/40"}`}>
+                    {s === 1 && "Profile"}
                     {s === 2 && "Physical"}
-                    {s === 3 && "Fitness"}
-                    {s === 4 && "Lifestyle"}
-                    {s === 5 && "AI/Theme"}
+                    {s === 3 && "Lifestyle"}
+                    {s === 4 && "Nutrition"}
+                    {s === 5 && "Language"}
                     {s === 6 && "Access"}
                   </span>
                 </div>
-                {s < 6 && <div className={`h-[2px] min-w-4 flex-1 ${step > s ? "bg-[var(--accent)]" : "bg-[var(--border-subtle)]"}`} />}
+                {s < 6 && <div className={`h-[2px] min-w-4 flex-1 ${step > s ? "bg-[#4d8eff]" : "bg-white/10"}`} />}
               </React.Fragment>
             ))}
           </div>
@@ -286,19 +302,19 @@ export function Onboarding() {
                 className="space-y-4 text-left"
               >
                 <div>
-                  <h2 className="text-lg font-bold text-[var(--foreground)] flex items-center gap-2">
-                    <User className="h-5 w-5 text-[var(--accent)]" /> Basic Bio Profiling
+                  <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                    <User className="h-5 w-5 text-[#adc6ff]" /> Step 1: Basic Profile
                   </h2>
-                  <p className="text-xs text-[var(--foreground-muted)]">Set up your profile identity and language parameters.</p>
+                  <p className="text-xs text-white/50">Your name, age, and fitness goal.</p>
                 </div>
 
                 <div className="space-y-3">
                   <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-[var(--foreground-muted)] uppercase tracking-wide block">Preferred Name</label>
+                    <label className="text-[10px] font-bold text-white/60 uppercase tracking-wide block">Your Name</label>
                     <Input
                       type="text"
                       required
-                      placeholder="e.g. Maya Chen"
+                      placeholder="e.g. Anil Kumar"
                       value={formData.name || ""}
                       onChange={(e) => handleSelect("name", e.target.value)}
                     />
@@ -306,7 +322,7 @@ export function Onboarding() {
 
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-[var(--foreground-muted)] uppercase tracking-wide block">Age (years)</label>
+                      <label className="text-[10px] font-bold text-white/60 uppercase tracking-wide block">Age (years)</label>
                       <Input
                         type="number"
                         required
@@ -318,37 +334,115 @@ export function Onboarding() {
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-[var(--foreground-muted)] uppercase tracking-wide block">System Language</label>
-                      <Dropdown
-                        value={formData.language || "en"}
-                        onChange={(val) => handleSelect("language", val as Language)}
-                        options={[
-                          { label: "English", value: "en" },
-                          { label: "Español", value: "es" },
-                          { label: "Français", value: "fr" },
-                          { label: "Deutsch", value: "de" },
-                          { label: "Hindi", value: "hi" },
-                          { label: "日本語", value: "ja" },
-                        ]}
-                      />
+                      <label className="text-[10px] font-bold text-white/60 uppercase tracking-wide block">Biological Sex</label>
+                      <div className="grid grid-cols-3 gap-2">
+                        {(["male", "female", "other"] as Gender[]).map((genderOption) => (
+                          <button
+                            type="button"
+                            key={genderOption}
+                            onClick={() => handleSelect("gender", genderOption)}
+                            className={`rounded-xl border p-2.5 text-center text-xs font-semibold capitalize transition ${
+                              formData.gender === genderOption
+                                ? "border-[#4d8eff] bg-[#4d8eff]/20 text-white"
+                                : "border-white/10 bg-white/5 text-white/60 hover:text-white"
+                            }`}
+                          >
+                            {genderOption}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   </div>
 
+                  {/* What do you want to achieve? */}
                   <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-[var(--foreground-muted)] uppercase tracking-wide block">Biological Sex</label>
-                    <div className="grid grid-cols-3 gap-3">
-                      {(["male", "female", "other"] as Gender[]).map((genderOption) => (
+                    <label className="text-[10px] font-bold text-white/60 uppercase tracking-wide block">
+                      What do you want to achieve?
+                    </label>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      {[
+                        { id: "general-fitness", label: "General Fitness", desc: "Overall Health" },
+                        { id: "sport-transition", label: "Start a Sport", desc: "Prepare Body" },
+                        { id: "athlete-performance", label: "Improve in Sport", desc: "Performance" },
+                        { id: "prepare-team", label: "Prepare for Team", desc: "Tryouts" },
+                        { id: "maintain-sport", label: "Maintain Fitness", desc: "In-Season" },
+                        { id: "return-to-activity", label: "Return to Activity", desc: "Reconditioning" },
+                      ].map((item) => {
+                        const isSelected = (formData.userMode || "general-fitness") === item.id || 
+                          (item.id === "prepare-team" && formData.userMode === "sport-transition");
+                        return (
+                          <button
+                            type="button"
+                            key={item.id}
+                            onClick={() => {
+                              const mode = item.id === "prepare-team" || item.id === "return-to-activity" 
+                                ? "sport-transition" 
+                                : item.id as any;
+                              handleSelect("userMode", mode);
+                            }}
+                            className={`rounded-xl border p-2.5 text-left transition flex flex-col justify-between min-h-[56px] ${
+                              isSelected
+                                ? "border-[#4d8eff] bg-[#4d8eff]/20 text-white shadow-md shadow-blue-500/10"
+                                : "border-white/10 bg-white/5 text-white/70 hover:bg-white/10 hover:text-white"
+                            }`}
+                          >
+                            <span className="text-xs font-bold block">{item.label}</span>
+                            <span className="text-[10px] text-white/50">{item.desc}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Sport Picker if sport goal selected */}
+                  {formData.userMode !== "general-fitness" && (
+                    <div className="space-y-1 pt-1">
+                      <label className="text-[10px] font-bold text-[#adc6ff] uppercase tracking-wide block">
+                        Which sport do you want to pursue?
+                      </label>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        {Object.values(SPORT_REGISTRY).map((s) => {
+                          const isSelected = (formData.selectedSport || "football") === s.id;
+                          return (
+                            <button
+                              type="button"
+                              key={s.id}
+                              onClick={() => handleSelect("selectedSport", s.id)}
+                              className={`rounded-xl border p-2 text-center transition flex flex-col items-center gap-1 ${
+                                isSelected
+                                  ? "border-amber-400 bg-amber-400/20 text-white shadow-md shadow-amber-500/10"
+                                  : "border-white/10 bg-white/5 text-white/70 hover:bg-white/10 hover:text-white"
+                              }`}
+                            >
+                              <span className="text-lg">{s.icon}</span>
+                              <span className="text-xs font-bold">{s.name}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-white/60 uppercase tracking-wide block">Primary Fitness Focus</label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {[
+                        { id: "fat-loss", label: "Fat Loss (Burn Fat)" },
+                        { id: "muscle-gain", label: "Muscle Gain (Build Mass)" },
+                        { id: "lean-bulk", label: "Lean Bulk (Aesthetic)" },
+                        { id: "maintenance", label: "General Health & Stamina" },
+                      ].map((g) => (
                         <button
                           type="button"
-                          key={genderOption}
-                          onClick={() => handleSelect("gender", genderOption)}
-                          className={`rounded-2xl border p-4 text-center text-xs font-semibold capitalize transition ${
-                            formData.gender === genderOption
-                              ? "border-[var(--accent)] bg-[var(--accent-glow)] text-[var(--foreground)]"
-                              : "border-[var(--border)] bg-[var(--surface)] text-[var(--foreground-muted)] hover:bg-[var(--surface-hover)]"
+                          key={g.id}
+                          onClick={() => handleSelect("goal", g.id)}
+                          className={`rounded-xl border p-2.5 text-left text-xs font-semibold transition ${
+                            formData.goal === g.id
+                              ? "border-[#4d8eff] bg-[#4d8eff]/20 text-white"
+                              : "border-white/10 bg-white/5 text-white/60 hover:text-white"
                           }`}
                         >
-                          {genderOption}
+                          {g.label}
                         </button>
                       ))}
                     </div>
@@ -367,16 +461,16 @@ export function Onboarding() {
                 className="space-y-4 text-left"
               >
                 <div>
-                  <h2 className="text-lg font-bold text-[var(--foreground)] flex items-center gap-2">
-                    <Ruler className="h-5 w-5 text-[var(--accent)]" /> Physical Metrics
+                  <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                    <Ruler className="h-5 w-5 text-[#adc6ff]" /> Step 2: Physical Measurements
                   </h2>
-                  <p className="text-xs text-[var(--foreground-muted)]">Precise bio-measurements calibrate cellular metabolic indexes.</p>
+                  <p className="text-xs text-white/50">Calibrates your baseline metabolic rate and training volume.</p>
                 </div>
 
                 <div className="space-y-3">
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-[var(--foreground-muted)] uppercase tracking-wide block">Height (cm)</label>
+                      <label className="text-[10px] font-bold text-white/60 uppercase tracking-wide block">Height (cm)</label>
                       <Input
                         type="number"
                         required
@@ -388,7 +482,7 @@ export function Onboarding() {
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-[var(--foreground-muted)] uppercase tracking-wide block">Weight (kg)</label>
+                      <label className="text-[10px] font-bold text-white/60 uppercase tracking-wide block">Weight (kg)</label>
                       <Input
                         type="number"
                         required
@@ -401,37 +495,26 @@ export function Onboarding() {
                     </div>
                   </div>
 
-                  <div className="grid gap-4 sm:grid-cols-3">
+                  <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-[var(--foreground-muted)] uppercase tracking-wide block">Body Fat % (optional)</label>
-                      <Input
-                        type="number"
-                        min={3}
-                        max={60}
-                        value={formData.bodyFat || ""}
-                        onChange={(e) => handleSelect("bodyFat", parseInt(e.target.value))}
+                      <label className="text-[10px] font-bold text-white/60 uppercase tracking-wide block">Gym Experience</label>
+                      <Dropdown
+                        value={formData.gymExperience || "intermediate"}
+                        onChange={(val) => handleSelect("gymExperience", val as GymExperience)}
+                        options={[
+                          { label: "Beginner (<1 year)", value: "beginner" },
+                          { label: "Intermediate (1-3 years)", value: "intermediate" },
+                          { label: "Advanced (3+ years)", value: "advanced" },
+                        ]}
                       />
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-[var(--foreground-muted)] uppercase tracking-wide block">Neck Circ. (cm)</label>
+                      <label className="text-[10px] font-bold text-white/60 uppercase tracking-wide block">Daily Step Goal</label>
                       <Input
                         type="number"
-                        min={20}
-                        max={60}
-                        value={formData.neckCircumference || ""}
-                        onChange={(e) => handleSelect("neckCircumference", parseInt(e.target.value))}
-                      />
-                    </div>
-
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-[var(--foreground-muted)] uppercase tracking-wide block">Leg/Thigh Circ. (cm)</label>
-                      <Input
-                        type="number"
-                        min={30}
-                        max={100}
-                        value={formData.legCircumference || ""}
-                        onChange={(e) => handleSelect("legCircumference", parseInt(e.target.value))}
+                        value={formData.dailyStepGoal || 8500}
+                        onChange={(e) => handleSelect("dailyStepGoal", parseInt(e.target.value))}
                       />
                     </div>
                   </div>
@@ -449,33 +532,35 @@ export function Onboarding() {
                 className="space-y-4 text-left"
               >
                 <div>
-                  <h2 className="text-lg font-bold text-[var(--foreground)] flex items-center gap-2">
-                    <Flame className="h-5 w-5 text-[var(--accent)]" /> Goals & Fitness Splits
+                  <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                    <Building2 className="h-5 w-5 text-[#adc6ff]" /> Step 3: Indian Lifestyle Context
                   </h2>
-                  <p className="text-xs text-[var(--foreground-muted)]">Establish training volume thresholds and environment preferences.</p>
+                  <p className="text-xs text-white/50">Helps Ojas adapt workouts around your daily schedule and exercise environment.</p>
                 </div>
 
-                <div className="space-y-3">
+                <div className="space-y-4">
                   <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-[var(--foreground-muted)] uppercase tracking-wide block">Fitness Goal</label>
-                    <div className="grid grid-cols-2 gap-2">
-                      {([
-                        { id: "fat-loss", label: "Fat Loss" },
-                        { id: "muscle-gain", label: "Muscle Gain" },
-                        { id: "lean-bulk", label: "Lean Bulk" },
-                        { id: "maintenance", label: "Maintenance" }
-                      ] as { id: FitnessGoal; label: string }[]).map((g) => (
+                    <label className="text-[10px] font-bold text-white/60 uppercase tracking-wide block">Lifestyle Role</label>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      {[
+                        { id: "college-student", label: "College Student" },
+                        { id: "working-professional", label: "Working Professional" },
+                        { id: "homemaker", label: "Homemaker" },
+                        { id: "athlete", label: "Athlete / Sports" },
+                        { id: "beginner", label: "Beginner" },
+                        { id: "other", label: "Other" },
+                      ].map((role) => (
                         <button
                           type="button"
-                          key={g.id}
-                          onClick={() => handleSelect("goal", g.id)}
-                          className={`rounded-2xl border p-3.5 text-center text-xs font-semibold transition ${
-                            formData.goal === g.id
-                              ? "border-[var(--accent)] bg-[var(--accent-glow)] text-[var(--foreground)]"
-                              : "border-[var(--border)] bg-[var(--surface)] text-[var(--foreground-muted)] hover:bg-[var(--surface-hover)]"
+                          key={role.id}
+                          onClick={() => handleSelect("lifestyleRole", role.id)}
+                          className={`rounded-xl border p-2.5 text-center text-xs font-semibold transition ${
+                            formData.lifestyleRole === role.id
+                              ? "border-[#4d8eff] bg-[#4d8eff]/20 text-white"
+                              : "border-white/10 bg-white/5 text-white/60 hover:text-white"
                           }`}
                         >
-                          {g.label}
+                          {role.label}
                         </button>
                       ))}
                     </div>
@@ -483,76 +568,31 @@ export function Onboarding() {
 
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-[var(--foreground-muted)] uppercase tracking-wide block">Gym Experience</label>
+                      <label className="text-[10px] font-bold text-white/60 uppercase tracking-wide block">Exercise Location</label>
                       <Dropdown
-                        value={formData.gymExperience || "intermediate"}
-                        onChange={(val) => handleSelect("gymExperience", val as GymExperience)}
-                        options={[
-                          { label: "Beginner (<1 year)", value: "beginner" },
-                          { label: "Intermediate (1-3 years)", value: "intermediate" },
-                          { label: "Advanced (3+ years)", value: "advanced" }
-                        ]}
-                      />
-                    </div>
-
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-[var(--foreground-muted)] uppercase tracking-wide block">Activity Level</label>
-                      <Dropdown
-                        value={formData.activityLevel || "moderately-active"}
-                        onChange={(val) => handleSelect("activityLevel", val as ActivityLevel)}
-                        options={[
-                          { label: "Sedentary (Office worker)", value: "sedentary" },
-                          { label: "Lightly Active (1-3 days/wk)", value: "lightly-active" },
-                          { label: "Moderately Active (3-5 days/wk)", value: "moderately-active" },
-                          { label: "Very Active (6-7 days/wk)", value: "very-active" },
-                          { label: "Extra Active (Double splits/Physical)", value: "extra-active" }
-                        ]}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid gap-4 sm:grid-cols-3">
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-[var(--foreground-muted)] uppercase tracking-wide block">Workout Split (days/wk)</label>
-                      <Input
-                        type="number"
-                        min={2}
-                        max={7}
-                        value={formData.workoutDaysPerWeek || ""}
-                        onChange={(e) => handleSelect("workoutDaysPerWeek", parseInt(e.target.value))}
-                      />
-                    </div>
-
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-[var(--foreground-muted)] uppercase tracking-wide block">Training Location</label>
-                      <Dropdown
-                        value={formData.workoutEnvironment || "gym"}
+                        value={formData.workoutEnvironment || "home"}
                         onChange={(val) => handleSelect("workoutEnvironment", val as WorkoutEnvironment)}
                         options={[
-                          { label: "Gym (Full weights)", value: "gym" },
-                          { label: "Home (Limited setup)", value: "home" },
-                          { label: "Both (Hybrid split)", value: "both" }
+                          { label: "Home (Living room / Bedroom)", value: "home" },
+                          { label: "Gym (Full equipment)", value: "gym" },
+                          { label: "Outdoor (Ground / Park)", value: "outdoor" },
+                          { label: "College Campus / Hostel", value: "college" },
                         ]}
                       />
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-[var(--foreground-muted)] uppercase tracking-wide block">Available Workout Time (min)</label>
-                      <Input
-                        type="number"
-                        min={5}
-                        max={120}
-                        value={formData.availableWorkoutTime || ""}
-                        onChange={(e) => handleSelect("availableWorkoutTime", parseInt(e.target.value))}
-                      />
-                    </div>
-
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-[var(--foreground-muted)] uppercase tracking-wide block">Workout Time</label>
-                      <Input
-                        type="time"
-                        value={formData.workoutTime || "07:30"}
-                        onChange={(e) => handleSelect("workoutTime", e.target.value)}
+                      <label className="text-[10px] font-bold text-white/60 uppercase tracking-wide block">Available Workout Time</label>
+                      <Dropdown
+                        value={String(formData.availableWorkoutTime || 35)}
+                        onChange={(val) => handleSelect("availableWorkoutTime", parseInt(val))}
+                        options={[
+                          { label: "10–15 mins (Express)", value: "15" },
+                          { label: "20–30 mins (HIIT Density)", value: "25" },
+                          { label: "30–45 mins (Balanced Split)", value: "35" },
+                          { label: "45–60 mins (Full Session)", value: "50" },
+                          { label: "60+ mins (Advanced)", value: "65" },
+                        ]}
                       />
                     </div>
                   </div>
@@ -570,90 +610,85 @@ export function Onboarding() {
                 className="space-y-4 text-left"
               >
                 <div>
-                  <h2 className="text-lg font-bold text-[var(--foreground)] flex items-center gap-2">
-                    <Activity className="h-5 w-5 text-[var(--accent)]" /> Lifestyle & Recovery
+                  <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                    <DollarSign className="h-5 w-5 text-emerald-400" /> Step 4: Food Environment & Daily Budget
                   </h2>
-                  <p className="text-xs text-[var(--foreground-muted)]">Align nutrition, sleep schedule, stress, and medical profiles.</p>
+                  <p className="text-xs text-white/50">Personalize Indian nutrition recommendations to your actual eating setup.</p>
                 </div>
 
-                <div className="space-y-3">
-                  <div className="grid gap-4 sm:grid-cols-3">
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-[var(--foreground-muted)] uppercase tracking-wide block">Wake Time</label>
-                      <Input
-                        type="time"
-                        value={formData.wakeTime || "06:30"}
-                        onChange={(e) => handleSelect("wakeTime", e.target.value)}
-                      />
+                <div className="space-y-4">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-white/60 uppercase tracking-wide block">Food Environment</label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {[
+                        { id: "hostel-mess", label: "Hostel / College Mess" },
+                        { id: "home-cooked", label: "Home Cooked Meals" },
+                        { id: "restaurant-tiffin", label: "Tiffin Center / Out" },
+                        { id: "meal-service", label: "Meal Subscription / Mixed" },
+                      ].map((env) => (
+                        <button
+                          type="button"
+                          key={env.id}
+                          onClick={() => {
+                            handleSelect("foodEnvironment", env.id);
+                            if (env.id === "hostel-mess") handleSelect("isHostelMode", true);
+                          }}
+                          className={`rounded-xl border p-3 text-left text-xs font-semibold transition ${
+                            formData.foodEnvironment === env.id
+                              ? "border-emerald-500 bg-emerald-500/20 text-white"
+                              : "border-white/10 bg-white/5 text-white/60 hover:text-white"
+                          }`}
+                        >
+                          {env.label}
+                        </button>
+                      ))}
                     </div>
+                  </div>
 
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-[var(--foreground-muted)] uppercase tracking-wide block">Sleep Time</label>
-                      <Input
-                        type="time"
-                        value={formData.sleepTime || "22:30"}
-                        onChange={(e) => handleSelect("sleepTime", e.target.value)}
-                      />
-                    </div>
-
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-[var(--foreground-muted)] uppercase tracking-wide block">Water Intake (L/day)</label>
-                      <Input
-                        type="number"
-                        step="0.5"
-                        min={1}
-                        max={10}
-                        value={formData.waterIntake || ""}
-                        onChange={(e) => handleSelect("waterIntake", parseFloat(e.target.value))}
-                      />
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-white/60 uppercase tracking-wide block">Daily Food Budget (INR)</label>
+                    <div className="grid grid-cols-4 gap-2">
+                      {[50, 100, 150, 250].map((b) => (
+                        <button
+                          type="button"
+                          key={b}
+                          onClick={() => handleSelect("dailyFoodBudget", b)}
+                          className={`rounded-xl border p-3 text-center text-xs font-bold transition ${
+                            formData.dailyFoodBudget === b
+                              ? "border-emerald-500 bg-emerald-500/20 text-emerald-300"
+                              : "border-white/10 bg-white/5 text-white/60 hover:text-white"
+                          }`}
+                        >
+                          ₹{b}/day
+                        </button>
+                      ))}
                     </div>
                   </div>
 
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-[var(--foreground-muted)] uppercase tracking-wide block">Diet Preference</label>
+                      <label className="text-[10px] font-bold text-white/60 uppercase tracking-wide block">Dietary Preference</label>
                       <Dropdown
                         value={formData.foodPreference || "both"}
                         onChange={(val) => handleSelect("foodPreference", val as FoodPreference)}
                         options={[
-                          { label: "Non-Veg (All Foods)", value: "both" },
-                          { label: "Vegetarian (No meat/fish)", value: "veg" }
+                          { label: "Non-Veg (Chicken, Fish, Eggs, Veg)", value: "both" },
+                          { label: "Eggitarian (Eggs + Vegetarian)", value: "eggitarian" },
+                          { label: "Pure Vegetarian (Dairy, Dal, Paneer)", value: "veg" },
+                          { label: "Vegan (100% Plant Based)", value: "vegan" },
                         ]}
                       />
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-[var(--foreground-muted)] uppercase tracking-wide block">Stress Level</label>
-                      <Dropdown
-                        value={formData.stressLevel || "medium"}
-                        onChange={(val) => handleSelect("stressLevel", val as StressLevel)}
-                        options={[
-                          { label: "Low (Very relaxed)", value: "low" },
-                          { label: "Medium (Workload pressure)", value: "medium" },
-                          { label: "High (Exhausting/Hyper)", value: "high" }
-                        ]}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-[var(--foreground-muted)] uppercase tracking-wide block">Occupation</label>
+                      <label className="text-[10px] font-bold text-white/60 uppercase tracking-wide block">Sleep Target (hours)</label>
                       <Input
-                        type="text"
-                        placeholder="e.g. Sales Executive"
-                        value={formData.occupation || ""}
-                        onChange={(e) => handleSelect("occupation", e.target.value)}
-                      />
-                    </div>
-
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-[var(--foreground-muted)] uppercase tracking-wide block">Allergies / Restrictions</label>
-                      <Input
-                        type="text"
-                        placeholder="e.g. Peanuts, Gluten (or 'None')"
-                        value={formData.allergies || ""}
-                        onChange={(e) => handleSelect("allergies", e.target.value)}
+                        type="number"
+                        step="0.5"
+                        min={4}
+                        max={12}
+                        value={formData.sleepDuration || 7.4}
+                        onChange={(e) => handleSelect("sleepDuration", parseFloat(e.target.value))}
                       />
                     </div>
                   </div>
@@ -671,52 +706,52 @@ export function Onboarding() {
                 className="space-y-4 text-left"
               >
                 <div>
-                  <h2 className="text-lg font-bold text-[var(--foreground)] flex items-center gap-2">
-                    <Sparkles className="h-5 w-5 text-[var(--accent)]" /> AI Persona & Themes
+                  <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                    <Languages className="h-5 w-5 text-[#adc6ff]" /> Step 5: Indian Language & AI Voice
                   </h2>
-                  <p className="text-xs text-[var(--foreground-muted)]">Tailor the AI Coach's psychological personality and UI styling.</p>
+                  <p className="text-xs text-white/50">Select your preferred language for the AI Coach and Daily Decisions.</p>
                 </div>
 
-                <div className="space-y-3">
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-[var(--foreground-muted)] uppercase tracking-wide block">AI Coach Personality</label>
-                      <Dropdown
-                        value={formData.aiPersonality || "motivational"}
-                        onChange={(val) => handleSelect("aiPersonality", val as AIPersonality)}
-                        options={[
-                          { label: "Motivational (Inspiring / Lion Cues)", value: "motivational" },
-                          { label: "Analytical (Biomechanical Data Focus)", value: "analytical" },
-                          { label: "Friendly (Empathetic / Supportive)", value: "friendly" },
-                          { label: "Strict (Tough Love / Vikram Style)", value: "strict" }
-                        ]}
-                      />
-                    </div>
-
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-[var(--foreground-muted)] uppercase tracking-wide block">Theme Preference</label>
-                      <Dropdown
-                        value={formData.themePreference || "dark"}
-                        onChange={(val) => handleSelect("themePreference", val as ThemePreference)}
-                        options={[
-                          { label: "Dark Mode (Power Saving)", value: "dark" },
-                          { label: "Light Mode (High Contrast)", value: "light" },
-                          { label: "Adaptive System Mode", value: "system" }
-                        ]}
-                      />
+                <div className="space-y-4">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-white/60 uppercase tracking-wide block">Preferred Language</label>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      {[
+                        { id: "en", label: "English" },
+                        { id: "te", label: "తెలుగు (Telugu)" },
+                        { id: "hi", label: "हिन्दी (Hindi)" },
+                        { id: "ta", label: "தமிழ் (Tamil)" },
+                        { id: "kn", label: "ಕನ್ನಡ (Kannada)" },
+                        { id: "ml", label: "മലയാളം (Malayalam)" },
+                        { id: "mr", label: "मराठी (Marathi)" },
+                        { id: "bn", label: "বাংলা (Bengali)" },
+                      ].map((lang) => (
+                        <button
+                          type="button"
+                          key={lang.id}
+                          onClick={() => handleSelect("language", lang.id)}
+                          className={`rounded-xl border p-3 text-center text-xs font-bold transition ${
+                            formData.language === lang.id
+                              ? "border-[#4d8eff] bg-[#4d8eff]/20 text-white"
+                              : "border-white/10 bg-white/5 text-white/60 hover:text-white"
+                          }`}
+                        >
+                          {lang.label}
+                        </button>
+                      ))}
                     </div>
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-[var(--foreground-muted)] uppercase tracking-wide block">Available Equipment</label>
-                    <div className="grid grid-cols-2 gap-2">
+                    <label className="text-[10px] font-bold text-white/60 uppercase tracking-wide block">Available Equipment</label>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                       {[
-                        { id: "barbell", label: "Barbells / Plates" },
-                        { id: "dumbbell", label: "Dumbbells" },
-                        { id: "cables", label: "Pulley/Cables" },
-                        { id: "machines", label: "Pin Machines" },
-                        { id: "resistance-bands", label: "Resistance Bands" },
                         { id: "bodyweight", label: "Bodyweight Only" },
+                        { id: "dumbbell", label: "Dumbbells" },
+                        { id: "resistance-bands", label: "Resistance Bands" },
+                        { id: "barbell", label: "Barbell & Plates" },
+                        { id: "cables", label: "Cable Machine" },
+                        { id: "pullup-bar", label: "Pull-up Bar" },
                       ].map((eq) => {
                         const isChecked = (formData.availableEquipment || []).includes(eq.id);
                         return (
@@ -724,14 +759,14 @@ export function Onboarding() {
                             type="button"
                             key={eq.id}
                             onClick={() => handleEquipmentToggle(eq.id)}
-                            className={`rounded-xl border p-3.5 text-left text-xs font-semibold transition flex items-center justify-between ${
+                            className={`rounded-xl border p-3 text-left text-xs font-semibold transition flex items-center justify-between ${
                               isChecked
-                                ? "border-[var(--accent)] bg-[var(--accent-glow)] text-[var(--foreground)]"
-                                : "border-[var(--border)] bg-[var(--surface)] text-[var(--foreground-muted)] hover:bg-[var(--surface-hover)]"
+                                ? "border-[#4d8eff] bg-[#4d8eff]/20 text-white"
+                                : "border-white/10 bg-white/5 text-white/60 hover:text-white"
                             }`}
                           >
                             <span>{eq.label}</span>
-                            {isChecked && <Check className="h-4 w-4 text-[var(--accent)]" />}
+                            {isChecked && <Check className="h-4 w-4 text-[#4d8eff]" />}
                           </button>
                         );
                       })}
@@ -751,83 +786,42 @@ export function Onboarding() {
                 className="space-y-4 text-left"
               >
                 <div>
-                  <h2 className="text-lg font-bold text-[var(--foreground)] flex items-center gap-2">
-                    <ShieldCheck className="h-5 w-5 text-[var(--accent)]" /> App Permissions
+                  <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                    <ShieldCheck className="h-5 w-5 text-[#adc6ff]" /> Step 6: Privacy & Local Permissions
                   </h2>
-                  <p className="text-xs text-[var(--foreground-muted)]">Grant accesses to activate Project Titan computer vision & telemetry syncs.</p>
+                  <p className="text-xs text-white/50">Ojas processes vision and pose tracking locally in your browser for privacy.</p>
                 </div>
 
-                <GlassCard className="p-6">
-                  <AnimatePresence mode="wait">
-                    {permissionsList.map((permission, index) => (
-                      permissionStep === index && (
-                        <motion.div
-                          key={permission.id}
-                          initial={{ opacity: 0, x: 15 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          exit={{ opacity: 0, x: -15 }}
-                          transition={{ duration: 0.15 }}
-                          className="space-y-4"
-                        >
-                          <div className="flex items-start gap-4">
-                            <div className={`flex h-12 w-12 items-center justify-center rounded-xl shrink-0 ${grantedPermissions.has(permission.id) ? "bg-[var(--accent-glow)] text-[var(--accent)]" : "bg-[var(--surface)] text-[var(--foreground-muted)]"}`}>
-                              <permission.icon className="h-6 w-6" />
-                            </div>
-                            <div className="flex-1">
-                              <h3 className="font-semibold text-white text-sm">{permission.title}</h3>
-                              <p className="text-xs text-white/50 mt-1 leading-relaxed">{permission.description}</p>
-                              {permission.required && (
-                                <span className="inline-block mt-2 text-[9px] font-bold text-[var(--warning)] bg-[var(--warning-subtle)] px-2 py-0.5 rounded-full uppercase tracking-wider">
-                                  Required OS Feature
-                                </span>
-                              )}
+                <div className="space-y-3">
+                  {permissionsList.map((perm) => {
+                    const isGranted = grantedPermissions.has(perm.id);
+                    const Icon = perm.icon;
+                    return (
+                      <div
+                        key={perm.id}
+                        onClick={() => handlePermissionToggle(perm.id)}
+                        className={`rounded-2xl border p-4 cursor-pointer transition flex items-start gap-3.5 ${
+                          isGranted
+                            ? "border-[#4d8eff]/40 bg-[#4d8eff]/10"
+                            : "border-white/10 bg-white/5"
+                        }`}
+                      >
+                        <div className="p-2 rounded-xl bg-white/10 text-[#adc6ff] shrink-0">
+                          <Icon className="h-5 w-5" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between">
+                            <h4 className="text-xs font-bold text-white">{perm.title}</h4>
+                            <div className={`h-5 w-5 rounded-full border flex items-center justify-center ${isGranted ? "bg-[#4d8eff] border-[#4d8eff] text-black" : "border-white/20"}`}>
+                              {isGranted && <Check className="h-3 w-3 stroke-[3]" />}
                             </div>
                           </div>
-
-                          <div className="flex gap-3 pt-2">
-                            <Button
-                              type="button"
-                              variant={grantedPermissions.has(permission.id) ? "premium" : "outline"}
-                              className="flex-1"
-                              onClick={() => {
-                                if (!grantedPermissions.has(permission.id)) {
-                                  handlePermissionToggle(permission.id);
-                                }
-                                nextPermission();
-                              }}
-                            >
-                              {grantedPermissions.has(permission.id) ? "✓ Granted" : "Authorize Access"}
-                            </Button>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              className="flex-1 text-white/50"
-                              onClick={() => {
-                                if (grantedPermissions.has(permission.id)) {
-                                  handlePermissionToggle(permission.id);
-                                }
-                                nextPermission();
-                              }}
-                            >
-                              Skip
-                            </Button>
-                          </div>
-
-                          <div className="flex justify-center gap-2 mt-4">
-                            {permissionsList.map((_, i) => (
-                              <div
-                                key={i}
-                                className={`h-1 w-4 rounded-full transition ${
-                                  i === permissionStep ? "bg-[var(--accent)]" : "bg-[var(--border-subtle)]"
-                                }`}
-                              />
-                            ))}
-                          </div>
-                        </motion.div>
-                      )
-                    ))}
-                  </AnimatePresence>
-                </GlassCard>
+                          <p className="text-[11px] text-white/60 mt-1 leading-relaxed">{perm.description}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </motion.div>
             )}
 
@@ -836,80 +830,68 @@ export function Onboarding() {
                 key="step7"
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.3 }}
-                className="space-y-6 text-center"
+                className="space-y-6 text-center py-6"
               >
-                <div className="flex justify-center">
-                  <div className="relative">
-                    <ProgressRing progress={100} size={120} strokeWidth={8} color="var(--accent)" />
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <Check className="h-8 w-8 text-[var(--accent)]" />
-                    </div>
-                  </div>
+                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-gradient-to-br from-emerald-400 to-teal-500 text-black shadow-xl shadow-emerald-500/20">
+                  <Check className="h-8 w-8 stroke-[2.5]" />
                 </div>
 
-                <div>
-                  <h2 className="text-2xl font-bold text-white mb-2">Titan OS Initialized</h2>
-                  <p className="text-xs text-[var(--foreground-muted)] max-w-sm mx-auto">
-                    Your custom physiological, training split, and AI personalities have been modeled. Welcome to hybrid human performance.
+                <div className="space-y-1.5">
+                  <h2 className="text-2xl font-black text-white tracking-tight">
+                    Ojas Intelligence Initialized
+                  </h2>
+                  <p className="text-xs text-white/60 max-w-md mx-auto">
+                    Your profile for <strong>{formData.name}</strong> ({formData.lifestyleRole?.replace("-", " ")}, ₹{formData.dailyFoodBudget}/day budget) has been synchronized with the Ojas Decision Engine.
                   </p>
                 </div>
 
-                <div className="grid gap-2 text-left max-w-md mx-auto bg-black/20 border border-white/5 p-4 rounded-2xl">
-                  <div className="flex items-center gap-2 text-xs text-white/60">
-                    <Check className="h-4 w-4 text-[var(--success)]" />
-                    <span>Calculated BMR TDEE target: **{formData.gender === "male" ? 2450 : 2180} kcal**</span>
+                <div className="grid grid-cols-3 gap-3 max-w-md mx-auto text-center">
+                  <div className="rounded-xl bg-white/5 border border-white/10 p-3">
+                    <span className="text-[10px] text-white/40 block">Workout Mode</span>
+                    <strong className="text-xs text-[#adc6ff]">{formData.availableWorkoutTime}m {formData.workoutEnvironment}</strong>
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-white/60">
-                    <Check className="h-4 w-4 text-[var(--success)]" />
-                    <span>AI Coach Personality set to **{formData.aiPersonality}**</span>
+                  <div className="rounded-xl bg-white/5 border border-white/10 p-3">
+                    <span className="text-[10px] text-white/40 block">Food Context</span>
+                    <strong className="text-xs text-amber-300">{formData.foodEnvironment?.split("-")[0]}</strong>
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-white/60">
-                    <Check className="h-4 w-4 text-[var(--success)]" />
-                    <span>Computer vision permission status: **Granted**</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs text-white/60">
-                    <Check className="h-4 w-4 text-[var(--success)]" />
-                    <span>Health kit synchronizer connection: **Sync Ready**</span>
+                  <div className="rounded-xl bg-white/5 border border-white/10 p-3">
+                    <span className="text-[10px] text-white/40 block">Language</span>
+                    <strong className="text-xs text-emerald-300 uppercase">{formData.language}</strong>
                   </div>
                 </div>
 
                 <Button
                   type="submit"
-                  variant="premium"
-                  className="w-full"
                   size="lg"
+                  className="w-full max-w-sm bg-gradient-to-r from-[#adc6ff] to-[#4d8eff] text-[#131315] font-extrabold text-sm py-6 rounded-2xl shadow-xl shadow-blue-500/20 hover:brightness-110"
                 >
-                  Start Your Fitness Journey
-                  <Sparkles className="h-4 w-4 ml-2" />
+                  ENTER OJAS FITNESS OS <ArrowRight className="h-4 w-4 ml-2" />
                 </Button>
               </motion.div>
             )}
           </AnimatePresence>
 
-          <div className="flex justify-between items-center pt-4 border-t border-[var(--border)]">
-            {step > 1 && step !== 7 ? (
-              <button
-                type="button"
-                onClick={step === 6 ? prevPermission : prevStep}
-                className="flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--surface)] px-5 py-2.5 text-xs font-semibold hover:bg-[var(--surface-hover)] transition text-white/70"
-              >
-                <ArrowLeft className="h-4 w-4" /> Back
-              </button>
-            ) : (
-              <div />
-            )}
+          {/* Bottom Nav Buttons */}
+          {step < 7 && (
+            <div className="flex items-center justify-between pt-4 border-t border-white/10">
+              {step > 1 ? (
+                <button
+                  type="button"
+                  onClick={prevStep}
+                  className="flex items-center gap-1 text-xs font-semibold text-white/60 hover:text-white"
+                >
+                  <ArrowLeft className="h-4 w-4" /> Back
+                </button>
+              ) : <div />}
 
-            {step < 6 && (
-              <button
+              <Button
                 type="submit"
-                className="flex items-center gap-1.5 rounded-full bg-[var(--accent)] px-6 py-2.5 text-xs font-semibold text-white hover:brightness-110 transition shadow-lg ml-auto"
+                className="bg-[#adc6ff] hover:bg-white text-[#131315] font-bold text-xs px-6 py-2 rounded-xl"
               >
-                Continue <ArrowRight className="h-4 w-4" />
-              </button>
-            )}
-          </div>
+                {step === 6 ? "Finish Setup" : "Next Step"} <ArrowRight className="h-3.5 w-3.5 ml-1" />
+              </Button>
+            </div>
+          )}
         </form>
       </motion.div>
     </div>

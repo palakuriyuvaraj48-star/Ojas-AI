@@ -151,7 +151,7 @@ export default function SIHDemoPage() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-400">Goal</span>
-                    <span className="font-semibold text-orange-400">{userProfile.goal.replace("-", " ")}</span>
+                    <span className="font-semibold text-orange-400">{(userProfile.goal || "fat-loss").replace(/-/g, " ")}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-400">Available Time</span>
@@ -348,7 +348,7 @@ export default function SIHDemoPage() {
               <div className="bg-slate-900/50 rounded p-4 space-y-3">
                 {adaptedPlan.adaptations.map((adaptation, idx) => (
                   <div key={idx} className="border-l-2 border-blue-500 pl-4">
-                    <div className="font-semibold text-blue-400 capitalize">{adaptation.type.replace("-", " ")}</div>
+                    <div className="font-semibold text-blue-400 capitalize">{(adaptation.type || "").replace(/-/g, " ")}</div>
                     <div className="text-slate-300 text-sm mt-1">{adaptation.reasoning}</div>
                     <div className="flex items-center gap-2 mt-2">
                       <span className="text-xs bg-blue-900/50 text-blue-300 px-2 py-1 rounded">

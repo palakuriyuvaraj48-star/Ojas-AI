@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Activity,
@@ -490,13 +491,13 @@ export function LivePanel({ coach }: { coach: FormCoachApi }) {
                 <CheckCircle2 className="h-4 w-4" />
                 Sync Workout to Digital Twin
               </button>
-              <a
+              <Link
                 href="/twin"
                 className="flex-1 rounded-xl border border-cyan-400/40 bg-cyan-500/10 py-3 text-xs font-bold text-cyan-300 hover:bg-cyan-500/20 transition flex items-center justify-center gap-2"
               >
                 <Sparkles className="h-4 w-4" />
                 View Updated Digital Twin
-              </a>
+              </Link>
             </div>
           </motion.div>
         </div>

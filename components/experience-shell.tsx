@@ -62,11 +62,14 @@ import { NotificationsView } from "@/components/fitness/premium/notifications-vi
 import { AutomationView } from "@/components/fitness/premium/automation-view";
 import { Onboarding } from "@/components/fitness/onboarding";
 import { AdaptivePlanningDemo } from "@/components/fitness/adaptive-planning-demo";
+import { SIHStoryModal } from "@/components/fitness/sih-story-modal";
+import { SportTransitionView } from "@/components/fitness/sport-transition-view";
 import { Sidebar, TopNav, BottomNav, GlobalAIButton } from "@/components/navigation";
 
 const navigation = [
   { href: "/dashboard", label: "Dashboard", icon: Activity },
   { href: "/adaptive-demo", label: "SIH Demo", icon: Sparkles },
+  { href: "/sports", label: "Sports Performance", icon: Trophy },
   { href: "/twin", label: "AI Digital Twin", icon: Sparkles },
   { href: "/workout", label: "Workout Plan", icon: Dumbbell },
   { href: "/form-coach", label: "Smart Form Coach", icon: Crosshair },
@@ -94,9 +97,12 @@ function Music2(props: React.SVGProps<SVGSVGElement>) {
   );
 }
 
+import { useTranslation } from "@/lib/i18n";
+
 export function ExperienceShell({ slug }: { slug: string }) {
   const pathname = usePathname();
   const { profile, resetData } = useFitness();
+  const { t } = useTranslation();
   const current = slug || "dashboard";
 
   // Authentication State Simulator
@@ -201,6 +207,11 @@ export function ExperienceShell({ slug }: { slug: string }) {
       case "sih-demo":
       case "adaptive-planning":
         return <AdaptivePlanningDemo />;
+      case "sports":
+      case "sport":
+      case "sport-transition":
+      case "sports-performance":
+        return <SportTransitionView />;
       case "twin":
       case "digital-twin":
       case "ai-digital-twin":
@@ -615,14 +626,26 @@ export function ExperienceShell({ slug }: { slug: string }) {
             animate={{ opacity: 1, y: 0 }}
             className="mb-6"
           >
-            <p className="text-sm text-[var(--foreground-muted)]">{current === "dashboard" ? "Performance console" : "Project Titan OS console"}</p>
+            <p className="text-sm text-[var(--foreground-muted)]">{current === "dashboard" ? t("dashboard_greeting", "Welcome back") : "Ojas AI Fitness OS"}</p>
             <h1 className="text-2xl font-bold tracking-tight text-[var(--foreground)] capitalize">
-              {current === "premium"
-                ? "Titan Subscription Hub"
+              {current === "dashboard"
+                ? t("nav_dashboard", "Dashboard")
+                : current === "workout" || current === "workouts"
+                ? t("nav_workouts", "Workout")
+                : current === "food" || current === "nutrition"
+                ? t("nav_nutrition", "Nutrition")
+                : current === "recovery"
+                ? t("nav_recovery", "Recovery")
+                : current === "progress"
+                ? t("nav_analytics", "Progress")
+                : current === "form-coach"
+                ? t("nav_form_coach", "Smart Form Coach")
+                : current === "twin"
+                ? t("nav_digital_twin", "AI Digital Twin")
+                : current === "settings"
+                ? t("nav_settings", "Settings")
                 : current === "achievements"
-                ? "Achievements & Levels"
-                : current === "history"
-                ? "Biometric logs history"
+                ? t("nav_achievements", "Achievements")
                 : current}
             </h1>
           </motion.div>
@@ -642,6 +665,9 @@ export function ExperienceShell({ slug }: { slug: string }) {
 
       {/* Global AI Button */}
       <GlobalAIButton />
+
+      {/* SIH Story & Evaluator Guide Modal */}
+      <SIHStoryModal />
 
       {/* Auth Modal */}
       <AuthModal 

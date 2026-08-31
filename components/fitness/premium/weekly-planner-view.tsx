@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { GlassCard } from "@/components/ui/glass-card";
 import {
   Calendar,
@@ -40,7 +40,7 @@ export function WeeklyPlannerView() {
     setHasConflict(hasDuplicateWorkouts);
   };
 
-  const duplicateActivity = (id: string) => {
+  const duplicateActivity = useCallback((id: string) => {
     const orig = activities.find(a => a.id === id);
     if (!orig) return;
     const duplicated = {
@@ -48,8 +48,8 @@ export function WeeklyPlannerView() {
       id: `a_${Date.now()}`,
       title: `${orig.title} (Copy)`,
     };
-    setActivities([...activities, duplicated]);
-  };
+    setActivities(prev => [...prev, duplicated]);
+  }, [activities]);
 
   const deleteActivity = (id: string) => {
     setActivities(prev => prev.filter(a => a.id !== id));

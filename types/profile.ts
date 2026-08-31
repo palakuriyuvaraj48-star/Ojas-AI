@@ -2,13 +2,18 @@ export type Gender = "male" | "female" | "other";
 export type FitnessGoal = "fat-loss" | "lean-bulk" | "muscle-gain" | "maintenance";
 export type ActivityLevel = "sedentary" | "lightly-active" | "moderately-active" | "very-active" | "extra-active";
 export type GymExperience = "beginner" | "intermediate" | "advanced";
-export type FoodPreference = "veg" | "non-veg" | "both";
+export type FoodPreference = "veg" | "non-veg" | "both" | "vegan" | "eggitarian";
 export type Budget = "budget" | "moderate" | "premium";
 export type StressLevel = "low" | "medium" | "high";
-export type WorkoutEnvironment = "gym" | "home" | "both";
+export type WorkoutEnvironment = "gym" | "home" | "both" | "outdoor" | "college";
 export type AIPersonality = "motivational" | "analytical" | "friendly" | "strict";
 export type ThemePreference = "system" | "light" | "dark";
-export type Language = "en" | "es" | "fr" | "de" | "hi" | "ja";
+export type Language =
+  | "en" | "te" | "hi" | "ta" | "kn" | "ml" | "mr" | "bn" | "gu" | "pa" | "or" | "ur" | "as" | "ne"
+  | "es" | "fr" | "de" | "pt" | "ar" | "ja" | "ko";
+
+export type IndianLifestyleRole = "college-student" | "working-professional" | "homemaker" | "athlete" | "beginner" | "other";
+export type FoodEnvironment = "hostel-mess" | "home-cooked" | "restaurant-tiffin" | "meal-service" | "mixed";
 
 export interface Permissions {
   calendar: boolean;
@@ -31,17 +36,20 @@ export interface ClientProfile {
   dailyStepGoal: number;
   occupation: string;
   workoutDaysPerWeek: number;
-  /** Usual time available for a single workout. Used by the adaptive planner. */
+  /** Usual time available for a single workout (minutes). Used by the adaptive planner. */
   availableWorkoutTime?: number;
   medicalConditions: string;
   injuries: string;
   foodPreference: FoodPreference;
   allergies: string;
   budget: Budget;
+  dailyFoodBudget?: number; // In INR e.g. 50, 100, 150, 250
   sleepDuration: number;
   stressLevel: StressLevel;
   availableEquipment: string[];
   lifestyle: string;
+  lifestyleRole?: IndianLifestyleRole;
+  foodEnvironment?: FoodEnvironment;
   neckCircumference?: number;
   legCircumference?: number;
   targetWeight?: number;
@@ -55,6 +63,13 @@ export interface ClientProfile {
   aiPersonality?: AIPersonality;
   themePreference?: ThemePreference;
   permissions?: Permissions;
+  cityOrRegion?: string;
+  isHostelMode?: boolean;
+  userMode?: "general-fitness" | "sport-transition" | "athlete-performance";
+  selectedSport?: string;
+  sportLevel?: "foundation" | "development" | "performance" | "advanced";
+  sportAttributes?: Record<string, number>;
+  sportBaselines?: Record<string, number>;
 }
 
 export interface DailyLog {
@@ -67,7 +82,12 @@ export interface DailyLog {
   stepsCount: number;
   workoutCompleted: boolean;
   workoutDuration: number;
+  workoutName?: string;
+  workoutIntensity?: string;
+  formScore?: number;
   fiberConsumed?: number;
+  costIncurred?: number;
+  notes?: string;
 }
 
 export interface WeeklyCheckIn {
@@ -97,6 +117,8 @@ export interface Message {
   recommendation?: any;
   cards?: any[];
   safety?: boolean;
+  language?: Language;
+  quickReplies?: string[];
 }
 
 export interface UserPreferences {
@@ -105,6 +127,7 @@ export interface UserPreferences {
   language: Language;
   voiceEnabled: boolean;
   aiPersonality: AIPersonality;
+  lowDataMode?: boolean;
   notifications: {
     workouts: boolean;
     nutrition: boolean;
@@ -116,6 +139,7 @@ export interface UserPreferences {
     profileVisibility: "public" | "friends" | "private";
     dataSharing: boolean;
     analyticsOptIn: boolean;
+    localCameraOnly: boolean;
   };
 }
 

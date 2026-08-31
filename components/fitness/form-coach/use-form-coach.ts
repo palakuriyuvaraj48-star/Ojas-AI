@@ -154,8 +154,12 @@ export function useFormCoach() {
   const [saving, setSaving] = useState(false);
   const [workoutCompleteSummary, setWorkoutCompleteSummary] = useState<CameraSessionRecord | null>(null);
 
-  if (!detectorRef.current) detectorRef.current = new PoseDetector(exercise, "simulation");
-  if (!voiceRef.current) voiceRef.current = new VoiceCoach();
+  if (detectorRef.current == null) {
+    detectorRef.current = new PoseDetector(exercise, "simulation");
+  }
+  if (voiceRef.current == null) {
+    voiceRef.current = new VoiceCoach();
+  }
 
   const refreshData = useCallback(() => {
     setSessions(getSessions());

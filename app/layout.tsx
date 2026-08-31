@@ -5,10 +5,11 @@ import { MusicProvider } from "@/components/providers/music-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
 import { AuthProvider } from "@/providers/auth-provider";
 import { ToastProvider } from "@/providers/toast-provider";
+import { I18nProvider } from "@/lib/i18n";
 
 export const metadata: Metadata = {
-  title: "Project Titan | AI Fitness Operating System",
-  description: "The world's first AI human performance OS. Complete posture tracking, food recognition scanning, and adaptive physiology modeling.",
+  title: "Ojas AI | India-First AI Fitness Operating System",
+  description: "India's first AI human fitness operating system. Movement, nutrition, recovery, hostel mode, budget coach, and multilingual AI coaching.",
 };
 
 export default function RootLayout({
@@ -23,7 +24,9 @@ export default function RootLayout({
           <AuthProvider>
             <ToastProvider>
               <FitnessProvider>
-                <MusicProvider>{children}</MusicProvider>
+                <I18nProvider>
+                  <MusicProvider>{children}</MusicProvider>
+                </I18nProvider>
               </FitnessProvider>
             </ToastProvider>
           </AuthProvider>

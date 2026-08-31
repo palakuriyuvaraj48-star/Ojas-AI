@@ -14,20 +14,30 @@ export function ProfileView() {
 
   const handleExportData = () => {
     if (typeof window === "undefined") return;
+    let logsHistory = [];
+    let checkInHistory = [];
+    let preferences = {};
+    try {
+      logsHistory = localStorage.getItem("lumina_logs") ? JSON.parse(localStorage.getItem("lumina_logs")!) : [];
+      checkInHistory = localStorage.getItem("lumina_checkins") ? JSON.parse(localStorage.getItem("lumina_checkins")!) : [];
+      preferences = localStorage.getItem("titan_preferences") ? JSON.parse(localStorage.getItem("titan_preferences")!) : {};
+    } catch (e) {
+      console.error("Error reading localStorage for export", e);
+    }
     const data = {
       profile,
       metrics,
       calorieTargets,
       macroTargets,
-      logsHistory: localStorage.getItem("lumina_logs") ? JSON.parse(localStorage.getItem("lumina_logs")!) : [],
-      checkInHistory: localStorage.getItem("lumina_checkins") ? JSON.parse(localStorage.getItem("lumina_checkins")!) : [],
-      preferences: localStorage.getItem("titan_preferences") ? JSON.parse(localStorage.getItem("titan_preferences")!) : {},
+      logsHistory,
+      checkInHistory,
+      preferences,
     };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `titan-os-profile-export-${new Date().toISOString().split("T")[0]}.json`;
+    a.download = `ojas-profile-export-${new Date().toISOString().split("T")[0]}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -43,7 +53,13 @@ export function ProfileView() {
     }
   };
 
-  if (!profile || !metrics || !calorieTargets || !macroTargets) return null;
+  if (!profile || !metrics || !calorieTargets || !macroTargets) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <div className="animate-spin text-2xl text-[var(--accent)]">🔄</div>
+      </div>
+    );
+  }
 
   const tabs = [
     { id: "overview", label: "Overview", icon: UserCircle2 },
@@ -156,7 +172,7 @@ export function ProfileView() {
               </div>
               <div>
                 <span className="text-[var(--foreground-muted)] text-xs block">Activity Level</span>
-                <span className="font-semibold text-[var(--foreground)] capitalize">{profile.activityLevel.replace("-", " ")}</span>
+                <span className="font-semibold text-[var(--foreground)] capitalize">{(profile.activityLevel || "moderately-active").replace("-", " ")}</span>
               </div>
             </div>
           </GlassCard>

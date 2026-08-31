@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useFitness } from "@/components/providers/fitness-provider";
 import {
   buildSignals,
@@ -36,9 +36,14 @@ const DEFAULT_FREE_TIME = 90;
 
 export function useRecovery(): RecoverySnapshot {
   const { profile, dailyLog, logsHistory, macroTargets } = useFitness();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return useMemo(() => {
-    if (!profile || !dailyLog) {
+    if (!mounted || !profile || !dailyLog) {
       return {
         loading: true,
         signals: null,
@@ -96,5 +101,5 @@ export function useRecovery(): RecoverySnapshot {
       review,
       freeTimeMinutes: DEFAULT_FREE_TIME,
     };
-  }, [profile, dailyLog, logsHistory, macroTargets]);
+  }, [mounted, profile, dailyLog, logsHistory, macroTargets]);
 }

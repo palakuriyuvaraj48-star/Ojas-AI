@@ -40,11 +40,15 @@ import {
 } from "recharts";
 import Link from "next/link";
 import { getSessions } from "@/lib/vision/session-storage";
+import { useTranslation } from "@/lib/i18n";
+import { TranslationDictionary } from "@/lib/i18n/types";
+import { SPORT_REGISTRY } from "@/lib/sports";
 
 type TwinTab = "twin" | "what-changed" | "timeline" | "simulator" | "forecast";
 
 export function TwinView() {
   const { profile, metrics, logsHistory } = useFitness();
+  const { t } = useTranslation();
   const [tab, setTab] = useState<TwinTab>("twin");
   const [selectedMuscle, setSelectedMuscle] = useState<string>("quads");
   const [avatarMode, setAvatarMode] = useState<"avatar" | "photo">("avatar");
@@ -161,24 +165,27 @@ export function TwinView() {
       {/* Navigation Tabs */}
       <GlassCard className="p-3 bg-[rgba(24,23,26,0.35)] border-white/5 flex gap-2 flex-wrap" glow>
         {[
-          { id: "twin", label: "Visual Digital Twin" },
+          { id: "twin", key: "nav_digital_twin" as keyof TranslationDictionary, label: "Visual Digital Twin" },
           { id: "what-changed", label: "What Changed?" },
           { id: "timeline", label: "Twin Timeline" },
           { id: "simulator", label: "AI Scenario Simulator" },
           { id: "forecast", label: "Projections" },
-        ].map((item) => (
-          <button
-            key={item.id}
-            onClick={() => setTab(item.id as TwinTab)}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition ${
-              tab === item.id
-                ? "bg-[#adc6ff] text-[#131315] shadow-md shadow-cyan-500/20"
-                : "text-white/60 hover:bg-white/5 hover:text-white"
-            }`}
-          >
-            {item.label}
-          </button>
-        ))}
+        ].map((item) => {
+          const label = item.key ? t(item.key, item.label) : item.label;
+          return (
+            <button
+              key={item.id}
+              onClick={() => setTab(item.id as TwinTab)}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition ${
+                tab === item.id
+                  ? "bg-[#adc6ff] text-[#131315] shadow-md shadow-cyan-500/20"
+                  : "text-white/60 hover:bg-white/5 hover:text-white"
+              }`}
+            >
+              {label}
+            </button>
+          );
+        })}
       </GlassCard>
 
       <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
@@ -411,6 +418,40 @@ export function TwinView() {
                       className="inline-flex items-center gap-1.5 text-xs font-bold text-cyan-300 bg-cyan-500/10 border border-cyan-400/30 px-3.5 py-2 rounded-xl hover:bg-cyan-500/20 transition"
                     >
                       Personalize Plan via Digital Twin <ArrowRight className="h-3.5 w-3.5" />
+                    </Link>
+                  </GlassCard>
+
+                  {/* Sport Transition & Athlete Performance Twin Layer */}
+                  <GlassCard className="p-5 border-amber-500/30 bg-gradient-to-r from-amber-950/20 via-slate-900/60 to-amber-950/20 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Award className="h-4 w-4 text-amber-400" />
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-amber-300">
+                          Sport Performance Twin Layer
+                        </h4>
+                      </div>
+                      <span className="text-[9px] font-bold uppercase bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-full">
+                        Active Transition
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3 text-xs">
+                      <div className="p-2.5 rounded-xl bg-white/5 border border-white/5">
+                        <span className="text-[10px] text-white/50 block">Target Sport</span>
+                        <strong className="text-white font-bold capitalize">
+                          {SPORT_REGISTRY[profile?.selectedSport || "football"]?.icon || "⚽"}{" "}
+                          {SPORT_REGISTRY[profile?.selectedSport || "football"]?.name || "Football"}
+                        </strong>
+                      </div>
+                      <div className="p-2.5 rounded-xl bg-white/5 border border-white/5">
+                        <span className="text-[10px] text-white/50 block">Primary Gap</span>
+                        <strong className="text-amber-300 font-bold">Agility (-18 pts)</strong>
+                      </div>
+                    </div>
+                    <Link
+                      href="/sports"
+                      className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-300 bg-amber-500/10 border border-amber-400/30 px-3.5 py-2 rounded-xl hover:bg-amber-500/20 transition w-full justify-center"
+                    >
+                      Open Sport Transition & Gap Analysis Hub <ArrowRight className="h-3.5 w-3.5" />
                     </Link>
                   </GlassCard>
                 </div>

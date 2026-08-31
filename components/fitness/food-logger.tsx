@@ -6,29 +6,51 @@ import { GlassCard } from "@/components/ui/glass-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { motion } from "framer-motion";
-import { Camera, Upload, VideoOff, RefreshCw, Mic, CheckCircle2, Search, Trash2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { 
+  Camera, 
+  Upload, 
+  RefreshCw, 
+  Mic, 
+  CheckCircle2, 
+  Search, 
+  Plus, 
+  Sparkles, 
+  HelpCircle,
+  Flame,
+  Info,
+  DollarSign
+} from "lucide-react";
+import { INDIAN_FOODS_DATABASE } from "@/lib/nutrition/indian-food-db";
+
+const QUICK_INDIAN_CHIPS = [
+  "Idli Sambar",
+  "Dal Tadka Rice",
+  "Egg Curry",
+  "Soya Chunks",
+  "Paneer Bhurji",
+  "Boiled Eggs",
+  "Poha",
+  "Curd",
+  "Chicken Curry",
+];
 
 export function FoodLogger() {
   const { logFood } = useFitness();
-  const [customFood, setCustomFood] = useState({ name: "", cal: "", prot: "", carb: "", fat: "", fiber: "" });
+  const [customFood, setCustomFood] = useState({ name: "", cal: "", prot: "", carb: "", fat: "", fiber: "", cost: "" });
   const [searchQuery, setSearchQuery] = useState("");
   const [foodResults, setFoodResults] = useState<any[]>([]);
   const [scanning, setScanning] = useState(false);
   const [scanPreview, setScanPreview] = useState<string | null>(null);
   const [scannedEstimate, setScannedEstimate] = useState<any | null>(null);
-  const [voiceListening, setVoiceListening] = useState(false);
+  const [loggedAlert, setLoggedAlert] = useState<string | null>(null);
   const uploadRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (searchQuery) {
-      fetch(`/api/nutrition/food?query=${searchQuery}`)
-        .then((res) => res.json())
-        .then(setFoodResults)
-        .catch(() => setFoodResults([]));
-    } else {
-      setFoodResults([]);
-    }
+    fetch(`/api/nutrition/food?query=${searchQuery}`)
+      .then((res) => res.json())
+      .then(setFoodResults)
+      .catch(() => setFoodResults([]));
   }, [searchQuery]);
 
   const handleCustomFoodSubmit = (e: React.FormEvent) => {
@@ -39,7 +61,9 @@ export function FoodLogger() {
     const f = parseInt(customFood.fat) || 0;
     const fib = parseInt(customFood.fiber) || 0;
     logFood(c, p, carb, f, fib);
-    setCustomFood({ name: "", cal: "", prot: "", carb: "", fat: "", fiber: "" });
+    setLoggedAlert(`✅ Logged ${customFood.name || "Meal"} (${p}g Protein, ${c} kcal)`);
+    setCustomFood({ name: "", cal: "", prot: "", carb: "", fat: "", fiber: "", cost: "" });
+    setTimeout(() => setLoggedAlert(null), 3000);
   };
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -61,6 +85,21 @@ export function FoodLogger() {
     }
   };
 
+  const handleScanPreset = (mealName: string) => {
+    setScanning(true);
+    fetch("/api/nutrition/scan", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ foodQuery: mealName }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setScannedEstimate(data);
+        setScanning(false);
+      })
+      .catch(() => setScanning(false));
+  };
+
   const saveScannedFood = () => {
     if (scannedEstimate) {
       logFood(
@@ -70,213 +109,303 @@ export function FoodLogger() {
         scannedEstimate.f,
         scannedEstimate.fiber || 0
       );
+      setLoggedAlert(`✅ Logged ${scannedEstimate.name} (${scannedEstimate.p}g Protein)`);
       setScanPreview(null);
       setScannedEstimate(null);
+      setTimeout(() => setLoggedAlert(null), 3000);
     }
   };
 
-  const quickLog = (c: number, p: number, carb: number, f: number) => {
-    logFood(c, p, carb, f);
+  const quickLogItem = (food: any) => {
+    logFood(food.cal, food.p, food.c, food.f, food.fiber || 0);
+    setLoggedAlert(`✅ Logged ${food.name} (${food.p}g Protein, ${food.cal} kcal)`);
+    setTimeout(() => setLoggedAlert(null), 3000);
   };
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-      <div className="space-y-6">
-        <GlassCard className="p-5 space-y-4">
-          <h3 className="font-bold text-white text-sm">Manual Food Entry</h3>
-          <form onSubmit={handleCustomFoodSubmit} className="space-y-3 text-xs">
-            <div>
-              <label className="text-[10px] font-bold text-white/50 block mb-1">Meal Name</label>
-              <Input type="text" required placeholder="e.g. Scrambled Eggs" value={customFood.name} onChange={(e) => setCustomFood({ ...customFood, name: e.target.value })} className="bg-black/20 border-white/10" />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-[10px] font-bold text-white/50 block mb-1">Calories (kcal)</label>
-                <Input type="number" required placeholder="e.g. 320" value={customFood.cal} onChange={(e) => setCustomFood({ ...customFood, cal: e.target.value })} className="bg-black/20 border-white/10" />
-              </div>
-              <div>
-                <label className="text-[10px] font-bold text-white/50 block mb-1">Protein (g)</label>
-                <Input type="number" required placeholder="e.g. 24" value={customFood.prot} onChange={(e) => setCustomFood({ ...customFood, prot: e.target.value })} className="bg-black/20 border-white/10" />
-              </div>
-            </div>
-            <div className="grid grid-cols-3 gap-2">
-              <div>
-                <label className="text-[10px] font-bold text-white/50 block mb-1">Carbs (g)</label>
-                <Input type="number" required placeholder="e.g. 8" value={customFood.carb} onChange={(e) => setCustomFood({ ...customFood, carb: e.target.value })} className="bg-black/20 border-white/10" />
-              </div>
-              <div>
-                <label className="text-[10px] font-bold text-white/50 block mb-1">Fat (g)</label>
-                <Input type="number" required placeholder="e.g. 18" value={customFood.fat} onChange={(e) => setCustomFood({ ...customFood, fat: e.target.value })} className="bg-black/20 border-white/10" />
-              </div>
-              <div>
-                <label className="text-[10px] font-bold text-white/50 block mb-1">Fiber (g)</label>
-                <Input type="number" placeholder="e.g. 5" value={customFood.fiber} onChange={(e) => setCustomFood({ ...customFood, fiber: e.target.value })} className="bg-black/20 border-white/10" />
-              </div>
-            </div>
-            <Button type="submit" variant="premium" className="w-full py-2 text-xs justify-center">Save Meal Log</Button>
-          </form>
-        </GlassCard>
+    <div className="space-y-6">
+      {loggedAlert && (
+        <div className="rounded-xl bg-emerald-500/20 border border-emerald-500/40 p-3 text-xs text-emerald-200 font-semibold flex items-center gap-2">
+          <CheckCircle2 className="h-4 w-4" />
+          {loggedAlert}
+        </div>
+      )}
 
-        <GlassCard className="p-5 space-y-3">
-          <h4 className="text-xs font-bold text-white uppercase tracking-wider">Quick Log Favorites</h4>
-          <div className="grid grid-cols-2 gap-2 text-left">
-            {[
-              { name: "Scrambled Eggs with Spinach", cal: 320, p: 24, c: 8, f: 18 },
-              { name: "Grilled Salmon bowl with Rice", cal: 620, p: 44, c: 55, f: 22 },
-              { name: "Greek Yogurt with Berries", cal: 240, p: 18, c: 28, f: 6 },
-              { name: "Protein Whey Shake", cal: 160, p: 30, c: 8, f: 2 },
-            ].map((fav, idx) => (
-              <button key={idx} onClick={() => quickLog(fav.cal, fav.p, fav.c, fav.f)} className="p-3 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition text-xs text-left">
-                <p className="font-bold text-white truncate">{fav.name}</p>
-                <p className="text-[9px] text-[var(--foreground-muted)] mt-1">{fav.cal} kcal • P: {fav.p}g • C: {fav.c}g</p>
-              </button>
-            ))}
-          </div>
-        </GlassCard>
-
-        <GlassCard className="p-5 space-y-3">
-          <h4 className="text-xs font-bold text-white uppercase tracking-wider">Voice Log</h4>
-          <button onClick={() => setVoiceListening(!voiceListening)} className={`w-full py-3 rounded-xl border text-xs font-bold transition flex items-center justify-center gap-2 ${voiceListening ? "border-[var(--accent)] bg-[var(--accent-glow)] text-[var(--accent)]" : "border-white/5 bg-white/5 text-white/70 hover:bg-white/10"}`}>
-            <Mic className="h-4 w-4" /> {voiceListening ? "Listening..." : "Tap to speak a meal"}
+      {/* Quick Indian Staples Filter Chips */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-1">
+        <span className="text-[11px] font-bold text-white/50 whitespace-nowrap">Quick Staples:</span>
+        {QUICK_INDIAN_CHIPS.map((chip) => (
+          <button
+            key={chip}
+            onClick={() => setSearchQuery(chip)}
+            className="rounded-lg bg-white/5 border border-white/10 px-2.5 py-1 text-xs text-white/80 hover:text-white hover:bg-white/10 whitespace-nowrap transition"
+          >
+            {chip}
           </button>
-        </GlassCard>
+        ))}
       </div>
 
-      <div className="space-y-6 text-left">
-        <GlassCard className="p-5 space-y-4">
-          <h3 className="font-bold text-white text-sm flex items-center gap-2">
-            <Camera className="h-4 w-4 text-cyan-400" /> AI Food Recognition
-          </h3>
-          <div className="relative aspect-video rounded-2xl border border-white/10 bg-black/20 overflow-hidden flex flex-col items-center justify-center p-4">
-            {scanPreview ? (
-              <>
-                <img src={scanPreview} alt="Scan preview" className="absolute inset-0 w-full h-full object-cover" />
-                {scanning && (
-                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-10">
-                    <RefreshCw className="h-8 w-8 text-[var(--accent)] animate-spin" />
-                  </div>
-                )}
-              </>
-            ) : (
-              <div className="text-center space-y-2">
-                <VideoOff className="h-8 w-8 text-white/20 mx-auto" />
-                <p className="text-xs text-[var(--foreground-muted)]">Upload a photo to estimate portions & macros.</p>
-              </div>
-            )}
-          </div>
-          <div className="flex gap-2">
-            <input type="file" ref={uploadRef} accept="image/*" className="hidden" onChange={handlePhotoUpload} />
-            <Button onClick={() => uploadRef.current?.click()} variant="outline" className="flex-1 text-xs py-2 justify-center gap-1.5">
-              <Upload className="h-4 w-4" /> Upload Meal Photo
-            </Button>
-          </div>
-          {scannedEstimate && (
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-3 border-t border-white/5 pt-3">
-              <div className="flex justify-between items-center text-xs">
-                <span className="font-bold text-white uppercase tracking-wider text-[10px]">AI Detected Food Details</span>
-                <Badge variant="success" label={`Confidence: ${scannedEstimate.confidence}%`} />
-              </div>
-              
-              <div className="space-y-2 text-xs">
-                <div>
-                  <label className="text-[9px] font-bold text-white/40 block mb-0.5">Meal Name</label>
-                  <Input 
-                    type="text" 
-                    value={scannedEstimate.name} 
-                    onChange={(e) => setScannedEstimate({ ...scannedEstimate, name: e.target.value })} 
-                    className="bg-black/20 border-white/10 py-1 h-8 text-xs" 
-                  />
-                </div>
-                <div>
-                  <label className="text-[9px] font-bold text-white/40 block mb-0.5">Portion</label>
-                  <Input 
-                    type="text" 
-                    value={scannedEstimate.portion} 
-                    onChange={(e) => setScannedEstimate({ ...scannedEstimate, portion: e.target.value })} 
-                    className="bg-black/20 border-white/10 py-1 h-8 text-xs" 
-                  />
-                </div>
-                
-                <div className="grid grid-cols-5 gap-2 text-[10px] font-mono text-white text-left">
-                  <div>
-                    <label className="text-[9px] font-bold text-white/40 block mb-0.5">Cal</label>
-                    <Input 
-                      type="number" 
-                      value={scannedEstimate.cal} 
-                      onChange={(e) => setScannedEstimate({ ...scannedEstimate, cal: parseInt(e.target.value) || 0 })} 
-                      className="bg-black/20 border-white/10 p-1 h-8 text-center text-xs" 
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[9px] font-bold text-white/40 block mb-0.5">Prot</label>
-                    <Input 
-                      type="number" 
-                      value={scannedEstimate.p} 
-                      onChange={(e) => setScannedEstimate({ ...scannedEstimate, p: parseInt(e.target.value) || 0 })} 
-                      className="bg-black/20 border-white/10 p-1 h-8 text-center text-xs" 
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[9px] font-bold text-white/40 block mb-0.5">Carb</label>
-                    <Input 
-                      type="number" 
-                      value={scannedEstimate.c} 
-                      onChange={(e) => setScannedEstimate({ ...scannedEstimate, c: parseInt(e.target.value) || 0 })} 
-                      className="bg-black/20 border-white/10 p-1 h-8 text-center text-xs" 
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[9px] font-bold text-white/40 block mb-0.5">Fat</label>
-                    <Input 
-                      type="number" 
-                      value={scannedEstimate.f} 
-                      onChange={(e) => setScannedEstimate({ ...scannedEstimate, f: parseInt(e.target.value) || 0 })} 
-                      className="bg-black/20 border-white/10 p-1 h-8 text-center text-xs" 
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[9px] font-bold text-white/40 block mb-0.5">Fiber</label>
-                    <Input 
-                      type="number" 
-                      value={scannedEstimate.fiber ?? 0} 
-                      onChange={(e) => setScannedEstimate({ ...scannedEstimate, fiber: parseInt(e.target.value) || 0 })} 
-                      className="bg-black/20 border-white/10 p-1 h-8 text-center text-xs" 
-                    />
-                  </div>
-                </div>
-              </div>
+      <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+        {/* Left: Indian Food Search & Manual Entry */}
+        <div className="space-y-6">
+          {/* Search Bar */}
+          <GlassCard className="p-5 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="font-bold text-white text-sm flex items-center gap-2">
+                <Search className="h-4 w-4 text-[#adc6ff]" />
+                Search Indian Foods Database
+              </h3>
+              <span className="text-[10px] text-white/40">60+ verified dishes</span>
+            </div>
 
-              <p className="text-[9px] text-amber-400/80 leading-relaxed italic mt-2">
-                ⚠️ **Disclaimer**: Nutritional values are AI estimates and may vary. Please verify values for exact accuracy.
-              </p>
+            <div className="relative">
+              <Input
+                type="text"
+                placeholder="Search idli, dal, chicken, paneer, dosa..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="bg-black/20 border-white/10 text-xs pl-8"
+              />
+              <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-white/40" />
+            </div>
 
-              <Button onClick={saveScannedFood} variant="premium" className="w-full text-xs py-2 justify-center">Accept & Log Macros</Button>
-            </motion.div>
-          )}
-        </GlassCard>
-
-        <GlassCard className="p-5 space-y-3">
-          <h3 className="font-bold text-white text-sm flex items-center gap-2">
-            <Search className="h-4 w-4 text-[var(--accent)]" /> Barcode Lookup
-          </h3>
-          <div className="relative">
-            <Input type="text" placeholder="Enter barcode or search food..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="bg-black/20 border-white/10 text-xs" />
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-[var(--foreground-muted)]">🔍</div>
-          </div>
-          {foodResults.length > 0 && (
-            <div className="space-y-2 max-h-48 overflow-y-auto">
+            <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
               {foodResults.map((food) => (
-                <div key={food.id || food.name} className="p-3 rounded-xl bg-white/5 border border-white/5 flex justify-between items-center text-xs">
-                  <div>
-                    <p className="font-semibold text-white text-[10px]">{food.name}</p>
-                    <p className="text-[9px] text-[var(--foreground-muted)]">{food.cal} kcal • P: {food.p}g • C: {food.c}g</p>
+                <div
+                  key={food.id}
+                  className="rounded-xl bg-white/[0.02] border border-white/5 p-3 flex items-center justify-between hover:bg-white/[0.05] transition"
+                >
+                  <div className="space-y-0.5 max-w-[75%]">
+                    <div className="flex items-center gap-2">
+                      <h4 className="font-bold text-white text-xs">{food.name}</h4>
+                      {food.cost && (
+                        <span className="text-[10px] text-emerald-400 font-semibold">~₹{food.cost}</span>
+                      )}
+                      {food.isHostelStaple && (
+                        <span className="rounded bg-amber-400/20 text-amber-300 text-[9px] px-1 py-0.2 font-bold">Hostel</span>
+                      )}
+                    </div>
+                    {food.regionalName && (
+                      <p className="text-[10px] text-white/40">{food.regionalName}</p>
+                    )}
+                    <div className="flex items-center gap-2 text-[10px] text-white/60">
+                      <span className="text-emerald-400 font-semibold">{food.p}g Protein</span>
+                      <span>•</span>
+                      <span>{food.c}g Carbs</span>
+                      <span>•</span>
+                      <span>{food.f}g Fat</span>
+                      <span>•</span>
+                      <span>{food.cal} kcal</span>
+                    </div>
+                    {food.ojasTip && (
+                      <p className="text-[10px] text-[#adc6ff]/80 italic line-clamp-1">
+                        💡 {food.ojasTip}
+                      </p>
+                    )}
                   </div>
-                  <button onClick={() => { logFood(food.cal, food.p, food.c, food.f); setSearchQuery(""); setFoodResults([]); }} className="px-2 py-1 bg-[var(--accent)] text-black text-[9px] rounded-lg font-bold">Log</button>
+
+                  <button
+                    onClick={() => quickLogItem(food)}
+                    className="flex items-center gap-1 rounded-lg bg-[#adc6ff]/20 hover:bg-[#adc6ff]/30 text-[#adc6ff] px-2.5 py-1.5 text-xs font-bold transition shrink-0"
+                  >
+                    <Plus className="h-3 w-3" />
+                    Log
+                  </button>
                 </div>
               ))}
             </div>
-          )}
-        </GlassCard>
+          </GlassCard>
+
+          {/* Manual Entry Form */}
+          <GlassCard className="p-5 space-y-4">
+            <h3 className="font-bold text-white text-sm">Manual Custom Food Entry</h3>
+            <form onSubmit={handleCustomFoodSubmit} className="space-y-3 text-xs">
+              <div>
+                <label className="text-[10px] font-bold text-white/50 block mb-1">Meal / Dish Name</label>
+                <Input
+                  type="text"
+                  required
+                  placeholder="e.g. 2 Rotis + Dal + Curd"
+                  value={customFood.name}
+                  onChange={(e) => setCustomFood({ ...customFood, name: e.target.value })}
+                  className="bg-black/20 border-white/10"
+                />
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <div>
+                  <label className="text-[10px] font-bold text-white/50 block mb-1">Calories (kcal)</label>
+                  <Input
+                    type="number"
+                    required
+                    placeholder="350"
+                    value={customFood.cal}
+                    onChange={(e) => setCustomFood({ ...customFood, cal: e.target.value })}
+                    className="bg-black/20 border-white/10"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-white/50 block mb-1">Protein (g)</label>
+                  <Input
+                    type="number"
+                    required
+                    placeholder="18"
+                    value={customFood.prot}
+                    onChange={(e) => setCustomFood({ ...customFood, prot: e.target.value })}
+                    className="bg-black/20 border-white/10"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-white/50 block mb-1">Carbs (g)</label>
+                  <Input
+                    type="number"
+                    placeholder="45"
+                    value={customFood.carb}
+                    onChange={(e) => setCustomFood({ ...customFood, carb: e.target.value })}
+                    className="bg-black/20 border-white/10"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-white/50 block mb-1">Fat (g)</label>
+                  <Input
+                    type="number"
+                    placeholder="10"
+                    value={customFood.fat}
+                    onChange={(e) => setCustomFood({ ...customFood, fat: e.target.value })}
+                    className="bg-black/20 border-white/10"
+                  />
+                </div>
+              </div>
+              <Button type="submit" size="sm" className="w-full bg-[#adc6ff] hover:bg-white text-[#131315] font-bold text-xs">
+                Log Custom Meal
+              </Button>
+            </form>
+          </GlassCard>
+        </div>
+
+        {/* Right: AI Food Photo Lens & Meal Intelligence */}
+        <div className="space-y-6">
+          <GlassCard className="p-5 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="font-bold text-white text-sm flex items-center gap-2">
+                <Camera className="h-4 w-4 text-[#adc6ff]" />
+                AI Food Lens (Photo → Estimate)
+              </h3>
+              <span className="text-[10px] text-white/40">Visual understanding</span>
+            </div>
+
+            <p className="text-xs text-white/60">
+              Upload a picture of your plate (e.g. Mess Thali, Rice + Dal + Chicken, Dosa) for instant nutrient estimation & coaching guidance.
+            </p>
+
+            <input
+              type="file"
+              accept="image/*"
+              ref={uploadRef}
+              onChange={handlePhotoUpload}
+              className="hidden"
+            />
+
+            <div
+              onClick={() => uploadRef.current?.click()}
+              className="border-2 border-dashed border-white/15 hover:border-[#adc6ff]/50 rounded-2xl p-6 text-center cursor-pointer transition bg-black/20 flex flex-col items-center justify-center gap-2"
+            >
+              {scanPreview ? (
+                <img src={scanPreview} alt="Food Preview" className="h-32 rounded-xl object-cover" />
+              ) : (
+                <>
+                  <Upload className="h-6 w-6 text-[#adc6ff]" />
+                  <span className="text-xs font-bold text-white">Click to Upload Plate Photo</span>
+                  <span className="text-[10px] text-white/40">Supports JPG, PNG, WebP</span>
+                </>
+              )}
+            </div>
+
+            {/* Quick Demo Scan Buttons */}
+            <div className="space-y-2">
+              <span className="text-[10px] font-bold text-white/50 block">Or try a sample meal:</span>
+              <div className="flex flex-wrap gap-1.5">
+                {[
+                  "Rice + Dal + Chicken",
+                  "Idli + Sambar",
+                  "Egg Bhurji + Roti",
+                  "Soya Chunks Curry",
+                ].map((demo) => (
+                  <button
+                    key={demo}
+                    onClick={() => handleScanPreset(demo)}
+                    className="rounded-lg bg-white/5 border border-white/10 px-2 py-1 text-[11px] text-white/70 hover:text-white hover:bg-white/10 transition"
+                  >
+                    {demo}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {scanning && (
+              <div className="p-4 text-center text-xs text-[#adc6ff] flex items-center justify-center gap-2 animate-pulse">
+                <RefreshCw className="h-4 w-4 animate-spin" />
+                Analyzing meal composition & portion density...
+              </div>
+            )}
+
+            {scannedEstimate && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="rounded-2xl bg-white/[0.03] border border-emerald-500/30 p-4 space-y-3"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-emerald-300">
+                    Recognized: {scannedEstimate.name}
+                  </span>
+                  <span className="rounded-full bg-white/10 px-2 py-0.5 text-[9px] text-white/70">
+                    {scannedEstimate.confidence || "Estimated"}
+                  </span>
+                </div>
+
+                <p className="text-[11px] text-white/50">{scannedEstimate.portion}</p>
+
+                {/* Macro breakdown */}
+                <div className="grid grid-cols-4 gap-2 text-center text-xs bg-black/30 rounded-xl p-2.5">
+                  <div>
+                    <span className="text-[10px] text-white/40 block">Calories</span>
+                    <strong className="text-white font-bold">{scannedEstimate.cal}</strong>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-emerald-400 block">Protein</span>
+                    <strong className="text-emerald-300 font-bold">{scannedEstimate.p}g</strong>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-white/40 block">Carbs</span>
+                    <strong className="text-white font-bold">{scannedEstimate.c}g</strong>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-white/40 block">Fat</span>
+                    <strong className="text-white font-bold">{scannedEstimate.f}g</strong>
+                  </div>
+                </div>
+
+                {/* Ojas Coaching Recommendation */}
+                {scannedEstimate.ojasRecommendation && (
+                  <div className="rounded-xl bg-black/40 p-3 border border-white/5 text-[11px] text-white/80 space-y-1">
+                    <span className="font-bold text-[#adc6ff] flex items-center gap-1">
+                      <Sparkles className="h-3 w-3" />
+                      Ojas Recommendation
+                    </span>
+                    <p>{scannedEstimate.ojasRecommendation}</p>
+                  </div>
+                )}
+
+                <Button
+                  onClick={saveScannedFood}
+                  className="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs"
+                >
+                  Save & Log to Daily Tracker
+                </Button>
+              </motion.div>
+            )}
+          </GlassCard>
+        </div>
       </div>
     </div>
   );

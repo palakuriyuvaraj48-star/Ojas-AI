@@ -1,3 +1,5 @@
+import type { SportTwinState } from "@/lib/sports/types";
+
 /**
  * Digital Twin: Persistent, evolving representation of user's complete state.
  * Updated as new data arrives. Compared against current plan to drive adaptation.
@@ -60,7 +62,7 @@ export interface NutritionState {
 export interface LifestyleState {
   availableTime: number; // minutes per day for fitness
   availableEquipment: string[];
-  workoutEnvironment: "gym" | "home" | "both" | "limited";
+  workoutEnvironment: "gym" | "home" | "both" | "limited" | "outdoor" | "college";
   stressLevel: "low" | "medium" | "high";
   lifestyle: string; // "student", "working", "busy", etc.
   travelStatus: "home" | "travelling";
@@ -96,6 +98,7 @@ export interface DigitalTwin {
   recovery: RecoveryState;
   nutrition: NutritionState;
   lifestyle: LifestyleState;
+  sport?: SportTwinState;
 
   // Tracking
   recentChanges: ContextChanges[];

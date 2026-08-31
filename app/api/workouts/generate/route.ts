@@ -7,7 +7,7 @@ export async function GET(request: Request) {
   const level = searchParams.get("level") || "intermediate";
   const recovery = searchParams.get("recovery") || "fresh";
   const location = searchParams.get("location") || "gym";
-  const availableTime = parseInt(searchParams.get("availableTime") || "45");
+  const availableTime = Math.max(10, Math.min(120, parseInt(searchParams.get("availableTime") || "45", 10) || 45));
   const soreMuscles = searchParams.get("soreMuscles") || "";
   const injuries = searchParams.get("injuries") || "";
 
@@ -57,11 +57,14 @@ export async function GET(request: Request) {
   const setsMultiplier = recovery === "tired" ? -1 : 0;
   const intensity = recovery === "tired" ? "Low (60-65% 1RM)" : goal === "strength" ? "High (80-85% 1RM)" : "Moderate (70-75% 1RM)";
 
+  const safeGoal = goal || "strength";
+  const safeLevel = level || "intermediate";
+
   const workout = {
-    title: `${goal.charAt(0).toUpperCase() + goal.slice(1)} ${location === "gym" ? "Gym" : "Home"} Routine`,
+    title: `${safeGoal.charAt(0).toUpperCase() + safeGoal.slice(1)} ${location === "gym" ? "Gym" : "Home"} Routine`,
     duration: availableTime,
     calories: Math.round(availableTime * (recovery === "tired" ? 5.5 : 7.8)),
-    difficulty: level.charAt(0).toUpperCase() + level.slice(1),
+    difficulty: safeLevel.charAt(0).toUpperCase() + safeLevel.slice(1),
     intensity,
     warmUp: [
       "5 mins light cardiorespiratory prep",

@@ -232,15 +232,22 @@ export function LandingPage() {
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
             <div className="mb-6 inline-flex items-center gap-2.5 rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3.5 py-1.5 text-xs font-bold text-cyan-300">
               <BrainCircuit className="h-3.5 w-3.5" />
-              SIH ADAPTIVE FITNESS SYSTEM
+              INDIA-FIRST AI FITNESS OPERATING SYSTEM
             </div>
 
-            <h1 className="max-w-3xl text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-6xl lg:text-7xl">
-              Fitness That <span className="bg-gradient-to-r from-cyan-300 via-teal-200 to-cyan-400 bg-clip-text text-transparent">Adapts</span> to Your Life
+            <h1 className="max-w-3xl text-4xl font-extrabold leading-[1.08] tracking-tight sm:text-6xl lg:text-6xl text-white">
+              Your AI Fitness OS, <br className="hidden sm:inline" />
+              <span className="bg-gradient-to-r from-cyan-300 via-teal-200 to-cyan-400 bg-clip-text text-transparent">built for India.</span>
             </h1>
 
-            <p className="mt-6 max-w-xl text-base leading-relaxed text-white/70 sm:text-lg">
-              Ojas AI continuously learns your fitness, recovery and lifestyle conditions and dynamically adapts your workout, nutrition and recovery plan.
+            <div className="mt-4 space-y-1 text-lg font-bold text-white/90 sm:text-xl">
+              <p className="text-cyan-300">✓ Understand your body.</p>
+              <p className="text-teal-300">✓ Understand your lifestyle.</p>
+              <p className="text-emerald-300">✓ Know what to do next.</p>
+            </div>
+
+            <p className="mt-6 max-w-xl text-sm leading-relaxed text-white/70 sm:text-base">
+              Ojas combines movement, nutrition, recovery, lifestyle and environmental context to create personalized fitness decisions that adapt with you.
             </p>
 
             <div className="mt-8 flex flex-wrap items-center gap-4">
@@ -249,33 +256,36 @@ export function LandingPage() {
                 className="inline-flex items-center gap-2.5 rounded-xl bg-cyan-400 px-6 py-3.5 text-sm font-bold text-slate-950 shadow-xl shadow-cyan-400/20 transition hover:bg-cyan-300"
               >
                 <Zap className="h-4 w-4" />
-                Start Your Adaptive Plan
+                Start with Ojas
               </Link>
               <button
                 onClick={() => scrollTo("adaptation-demo")}
                 className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-6 py-3.5 text-sm font-bold text-white/90 backdrop-blur transition hover:border-cyan-400/40 hover:bg-white/10"
               >
-                See How Ojas Adapts
+                See how it works
                 <ArrowDown className="h-4 w-4 text-cyan-400" />
               </button>
             </div>
 
-            <div className="mt-8 flex items-center gap-6 text-xs text-white/50">
+            <div className="mt-8 flex flex-wrap items-center gap-6 text-xs text-white/60">
               <span className="flex items-center gap-1.5">
-                <CheckCircle2 className="h-4 w-4 text-cyan-400" /> Real-time Digital Twin
+                <CheckCircle2 className="h-4 w-4 text-cyan-400" /> SENSE → UNDERSTAND → DECIDE
               </span>
               <span className="flex items-center gap-1.5">
-                <CheckCircle2 className="h-4 w-4 text-cyan-400" /> Dynamic AI Decision Engine
+                <CheckCircle2 className="h-4 w-4 text-emerald-400" /> Hostel Mode & Budget Coach
+              </span>
+              <span className="flex items-center gap-1.5">
+                <CheckCircle2 className="h-4 w-4 text-[#adc6ff]" /> Multilingual (EN / తెలుగు / हिंदी)
               </span>
             </div>
 
             {/* Core Message Callout */}
             <div className="mt-8 rounded-2xl border border-cyan-400/20 bg-gradient-to-r from-cyan-950/40 via-slate-900/60 to-cyan-950/20 p-4 backdrop-blur">
               <p className="text-sm font-extrabold tracking-tight text-white sm:text-base">
-                “Your life changes. Your fitness plan should too.”
+                “India's fitness problem isn't lack of information — it's knowing what to do today.”
               </p>
               <p className="mt-1 text-xs leading-relaxed text-white/60">
-                Ojas AI continuously adapts your fitness plan to your changing time, lifestyle, recovery, nutrition and progress.
+                Ojas synthesizes movement, Indian meals, hostel mess menus, budget limits (₹50-₹250), sleep, and weather to make actionable daily decisions.
               </p>
             </div>
           </motion.div>

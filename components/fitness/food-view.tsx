@@ -2,8 +2,20 @@
 
 import React, { useState, useEffect } from "react";
 import { useFitness } from "@/components/providers/fitness-provider";
-import { GlassCard } from "@/components/ui/glass-card";
-import { Apple, Sparkles, Camera, ShoppingCart, BookOpen, UtensilsCrossed, Waves, TrendingUp, MapPin, BellRing } from "lucide-react";
+import { 
+  Apple, 
+  Sparkles, 
+  Camera, 
+  ShoppingCart, 
+  BookOpen, 
+  UtensilsCrossed, 
+  Waves, 
+  TrendingUp, 
+  MapPin, 
+  BellRing,
+  Building2,
+  DollarSign
+} from "lucide-react";
 import { NutritionDashboard } from "@/components/fitness/nutrition-dashboard";
 import { MealPlanner, MealPlanResults } from "@/components/fitness/meal-planner";
 import { FoodLogger } from "@/components/fitness/food-logger";
@@ -14,9 +26,22 @@ import { WaterTracker } from "@/components/fitness/water-tracker";
 import { NutritionAnalytics } from "@/components/fitness/nutrition-analytics";
 import { RestaurantDining } from "@/components/fitness/restaurant-dining";
 import { NutritionNotifications } from "@/components/fitness/nutrition-notifications";
+import { HostelMode } from "@/components/fitness/hostel-mode";
+import { BudgetCoach } from "@/components/fitness/budget-coach";
+import { useTranslation } from "@/lib/i18n";
+import { TranslationDictionary } from "@/lib/i18n/types";
+
+interface FoodTabConfig {
+  id: string;
+  key?: keyof TranslationDictionary;
+  defaultLabel: string;
+  icon: any;
+  highlight?: boolean;
+}
 
 export function FoodView() {
-  const { profile, dailyLog, calorieTargets, macroTargets, logFood, logWater } = useFitness();
+  const { profile, dailyLog, calorieTargets, macroTargets, logWater } = useFitness();
+  const { t } = useTranslation();
 
   const [activeTab, setActiveTab] = useState<string>("dashboard");
 
@@ -24,19 +49,19 @@ export function FoodView() {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
       const tab = params.get("tab");
-      if (tab && ["dashboard", "planner", "scanner", "grocery", "recipes", "coach", "water", "analytics", "restaurant", "notifications"].includes(tab)) {
+      if (tab && ["dashboard", "hostel", "budget", "planner", "scanner", "grocery", "recipes", "coach", "water", "analytics", "restaurant", "notifications"].includes(tab)) {
         setActiveTab(tab);
       }
     }
-  }, [typeof window !== "undefined" ? window.location.search : ""]);
+  }, []);
 
   const [compiledPlan, setCompiledPlan] = useState<any | null>(null);
 
   const handleNavigate = (route: string) => {
-    if (route.startsWith("/nutrition?tab=")) {
+    if (route.startsWith("/nutrition?tab=") || route.startsWith("/food?tab=")) {
       const tab = route.split("tab=")[1];
       setActiveTab(tab);
-      window.history.pushState({}, "", `/nutrition?tab=${tab}`);
+      window.history.pushState({}, "", `/food?tab=${tab}`);
     } else if (route.startsWith("/")) {
       window.location.href = route;
     }
@@ -44,57 +69,60 @@ export function FoodView() {
 
   if (!profile || !calorieTargets || !macroTargets) return null;
 
+  const tabs: FoodTabConfig[] = [
+    { id: "dashboard", key: "nav_nutrition_dashboard", defaultLabel: "Nutrition Dashboard", icon: Apple },
+    { id: "hostel", key: "nutrition_hostel_mode", defaultLabel: "Hostel Mode", icon: Building2, highlight: true },
+    { id: "budget", key: "nutrition_budget_coach", defaultLabel: "Budget Coach", icon: DollarSign, highlight: true },
+    { id: "scanner", key: "nav_food_scanner", defaultLabel: "Log & Scan Food", icon: Camera },
+    { id: "planner", key: "nav_meal_planner", defaultLabel: "AI Planner", icon: Sparkles },
+    { id: "grocery", key: "nav_grocery", defaultLabel: "Grocery Assistant", icon: ShoppingCart },
+    { id: "recipes", key: "nav_recipes", defaultLabel: "Recipe Maker", icon: BookOpen },
+    { id: "coach", key: "nav_ai_dietitian", defaultLabel: "AI Dietitian", icon: UtensilsCrossed },
+    { id: "water", key: "nav_water_tracker", defaultLabel: "Water Tracker", icon: Waves },
+    { id: "analytics", key: "nav_nutrition_analytics", defaultLabel: "Analytics", icon: TrendingUp },
+    { id: "restaurant", key: "nav_restaurant_dining", defaultLabel: "Restaurant", icon: MapPin },
+    { id: "notifications", key: "nav_smart_alerts", defaultLabel: "Smart Alerts", icon: BellRing },
+  ];
+
   return (
     <div className="space-y-6 relative text-left">
-      {/* Sub Navigation Bar */}
+      {/* Sub Navigation Bar with India-First Features */}
       <div className="flex gap-2 overflow-x-auto pb-2 border-b border-white/10">
-        {[
-          { id: "dashboard", label: "Nutrition Dashboard", icon: Apple },
-          { id: "planner", label: "AI Planner", icon: Sparkles },
-          { id: "scanner", label: "Log & Scan Food", icon: Camera },
-          { id: "grocery", label: "Grocery Assistant", icon: ShoppingCart },
-          { id: "recipes", label: "Recipe Maker", icon: BookOpen },
-          { id: "coach", label: "AI Dietitian", icon: UtensilsCrossed },
-          { id: "water", label: "Water Tracker", icon: Waves },
-          { id: "analytics", label: "Analytics", icon: TrendingUp },
-          { id: "restaurant", label: "Restaurant", icon: MapPin },
-          { id: "notifications", label: "Smart Alerts", icon: BellRing },
-        ].map((tab) => {
+        {tabs.map((tab) => {
           const Icon = tab.icon;
+          const isActive = activeTab === tab.id;
+          const label = tab.key ? t(tab.key, tab.defaultLabel) : tab.defaultLabel;
+
           return (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold whitespace-nowrap transition ${
-                activeTab === tab.id
-                  ? "bg-[var(--accent-glow)] text-[var(--accent)] border border-[var(--accent)]/30"
-                  : "text-white/60 hover:text-white bg-white/5 border border-transparent"
+              onClick={() => {
+                setActiveTab(tab.id);
+                window.history.pushState({}, "", `/food?tab=${tab.id}`);
+              }}
+              className={`flex items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-bold whitespace-nowrap transition ${
+                isActive
+                  ? "bg-[#adc6ff] text-[#131315] shadow-lg shadow-blue-500/20"
+                  : tab.highlight
+                  ? "bg-amber-400/10 text-amber-300 border border-amber-400/30 hover:bg-amber-400/20"
+                  : "bg-white/5 text-white/60 hover:text-white hover:bg-white/10"
               }`}
             >
-              <Icon className="h-4 w-4" />
-              {tab.label}
+              <Icon className="h-3.5 w-3.5" />
+              {label}
             </button>
           );
         })}
       </div>
 
+      {/* View Switcher */}
       {activeTab === "dashboard" && <NutritionDashboard onNavigate={handleNavigate} />}
+      {activeTab === "hostel" && <HostelMode />}
+      {activeTab === "budget" && <BudgetCoach />}
       {activeTab === "planner" && (
-        <div className="grid gap-6 lg:grid-cols-[1fr_1.2fr]">
-          <MealPlanner onCompile={(plan) => setCompiledPlan(plan)} />
-          <MealPlanResults plan={compiledPlan} onSwapMeal={(idx) => {
-            setCompiledPlan((prev: any) => {
-              if (!prev) return prev;
-              const altMeals = [
-                { title: "Grilled Chicken breast with Sweet Potato", cal: 520, p: 40, c: 38, f: 12, cost: 95 },
-                { title: "Tofu Scramble with whole wheat Roti", cal: 320, p: 20, c: 25, f: 10, cost: 40 }
-              ];
-              const chooseAlt = prev.meals[idx]?.title?.toLowerCase().includes("tofu") || prev.meals[idx]?.title?.toLowerCase().includes("veg") ? altMeals[1] : altMeals[0];
-              const updatedMeals = [...prev.meals];
-              updatedMeals[idx] = { ...updatedMeals[idx], title: chooseAlt.title, cal: chooseAlt.cal, p: chooseAlt.p, c: chooseAlt.c, f: chooseAlt.f, cost: chooseAlt.cost };
-              return { ...prev, meals: updatedMeals };
-            });
-          }} />
+        <div className="space-y-6">
+          <MealPlanner onCompile={(plan: any) => setCompiledPlan(plan)} />
+          {compiledPlan && <MealPlanResults plan={compiledPlan} onSwapMeal={() => {}} />}
         </div>
       )}
       {activeTab === "scanner" && <FoodLogger />}
@@ -104,7 +132,7 @@ export function FoodView() {
       {activeTab === "water" && <WaterTracker dailyLog={dailyLog} logWater={logWater} calorieTargets={calorieTargets} />}
       {activeTab === "analytics" && <NutritionAnalytics />}
       {activeTab === "restaurant" && <RestaurantDining />}
-      {activeTab === "notifications" && <NutritionNotifications onAction={handleNavigate} />}
+      {activeTab === "notifications" && <NutritionNotifications />}
     </div>
   );
 }

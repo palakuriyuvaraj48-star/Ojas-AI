@@ -41,6 +41,10 @@ export function generateInitialPlan(profile: ClientProfile, twin: DigitalTwin): 
     macro.fat = Math.round(dailyCalories * 0.25) / 9;
     macro.carbs = (dailyCalories - macro.protein * 4 - macro.fat * 9) / 4;
   } else if (profile.goal === "muscle-gain" || profile.goal === "lean-bulk") {
+/**
+ * Adaptive Engine: Core intelligence that adapts fitness plans based on evolving user state.
+ * Compares CURRENT_STATE vs CURRENT_PLAN vs EXPECTED_PROGRESS to decide what changes.
+ */
     dailyCalories = Math.round(tdee * 1.1); // 10% surplus
     macro.protein = Math.round(profile.weight * 2.0);
     macro.fat = Math.round(dailyCalories * 0.25) / 9;
@@ -52,7 +56,7 @@ export function generateInitialPlan(profile: ClientProfile, twin: DigitalTwin): 
     macro.carbs = (dailyCalories - macro.protein * 4 - macro.fat * 9) / 4;
   }
 
-  // Build workout plan based on available time and equipment
+  // Build workout plan based on available time, equipment, and active sport
   const availableTime = twin.lifestyle.availableTime;
   let workoutDuration = 45;
   let daysPerWeek = Math.min(profile.workoutDaysPerWeek, 5);
@@ -60,18 +64,20 @@ export function generateInitialPlan(profile: ClientProfile, twin: DigitalTwin): 
 
   if (availableTime < 30) {
     workoutDuration = 20;
-    intensity = "high"; // HIIT style
+    intensity = "high";
   } else if (availableTime < 45) {
     workoutDuration = 30;
     intensity = "moderate";
   }
 
-  // Select exercises based on equipment
+  // Select exercises based on equipment and active sport
   const exercises = selectExercises(
     profile.goal,
     workoutDuration,
     twin.lifestyle.availableEquipment,
-    intensity
+    intensity,
+    twin.sport?.selectedSportId,
+    twin.sport?.primaryGapAttribute
   );
 
   const workoutPlan: WorkoutPlan = {
@@ -80,9 +86,11 @@ export function generateInitialPlan(profile: ClientProfile, twin: DigitalTwin): 
     daysPerWeek: daysPerWeek,
     intensity,
     exercises,
-    focusAreas: getGoalFocusAreas(profile.goal),
+    focusAreas: twin.sport?.selectedSportId && twin.sport.userMode !== "general-fitness"
+      ? [`${twin.sport.selectedSportId} conditioning`, `${twin.sport.primaryGapAttribute || "agility"} gap priority`, "dynamic recovery"]
+      : getGoalFocusAreas(profile.goal),
     equipment: twin.lifestyle.availableEquipment,
-    expectedProgress: `${profile.goal.replace("-", " ")} over 12 weeks`,
+    expectedProgress: `${(profile.goal || "fat-loss").replace(/-/g, " ")} over 12 weeks`,
   };
 
   // Nutrition plan
@@ -140,9 +148,6 @@ export function generateInitialPlan(profile: ClientProfile, twin: DigitalTwin): 
   };
 }
 
-/**
- * Adapt an existing plan based on changes in the digital twin.
- */
 export function adaptPlan(
   currentPlan: FitnessPlan,
   currentTwin: DigitalTwin,
@@ -341,17 +346,84 @@ export function adaptPlan(
 }
 
 /**
- * Helper: Select exercises based on goal, duration, equipment, intensity.
+ * Helper: Select exercises based on goal, duration, equipment, intensity, and active sport.
  */
 function selectExercises(
   goal: FitnessGoal,
   duration: number,
   equipment: string[],
-  intensity: string
+  intensity: string,
+  sportId?: string,
+  primaryGap?: string
 ): WorkoutPlan["exercises"] {
   const baseExercises: WorkoutPlan["exercises"] = [];
 
-  // For short workouts (20min), do compound movements
+  // Sport-specific signature drill injection
+  if (sportId === "football" || primaryGap === "agility") {
+    baseExercises.push({
+      name: "5-10-5 Pro Agility Shuttle Drills",
+      sets: 4,
+      reps: [3, 4],
+      rest: 45,
+      notes: "Primary Sport Gap Focus: Low center of gravity, rapid lateral cuts",
+    });
+    baseExercises.push({
+      name: "Nordic Hamstring Eccentrics & Single-Leg RDL",
+      sets: 3,
+      reps: [6, 8],
+      rest: 60,
+      notes: "Injury Prevention: Hamstring deceleration strength",
+    });
+    baseExercises.push({
+      name: "Explosive Box Jumps & Split Squats",
+      sets: 3,
+      reps: [8, 10],
+      rest: 45,
+      notes: "Lower Body Power: Aerial duel elevation",
+    });
+    return baseExercises;
+  } else if (sportId === "cricket" || primaryGap === "rotational_power") {
+    baseExercises.push({
+      name: "Single-Arm Rotational Cable / Band Drive",
+      sets: 4,
+      reps: [8, 10],
+      rest: 45,
+      notes: "Primary Sport Gap Focus: Batting exit velocity and bowling power transfer",
+    });
+    baseExercises.push({
+      name: "22-Yard Run-a-Three Sprint Shuttles",
+      sets: 4,
+      reps: [3, 3],
+      rest: 60,
+      notes: "Sport Acceleration: Rapid turning between wickets",
+    });
+    baseExercises.push({
+      name: "Prone Y-T-W Shoulder Scapular Complex",
+      sets: 3,
+      reps: [12, 15],
+      rest: 30,
+      notes: "Shoulder Resilience: Rotator cuff protection",
+    });
+    return baseExercises;
+  } else if (sportId === "badminton") {
+    baseExercises.push({
+      name: "6-Corner Shadow Footwork Interval Pyramids",
+      sets: 4,
+      reps: [6, 8],
+      rest: 45,
+      notes: "Primary Sport Gap Focus: Court coverage and explosive net lunges",
+    });
+    baseExercises.push({
+      name: "Rotational Plyo Scissor Jumps",
+      sets: 3,
+      reps: [10, 12],
+      rest: 45,
+      notes: "Jump Smash Power: Quick foot turnover",
+    });
+    return baseExercises;
+  }
+
+  // Standard fitness conditioning
   if (duration <= 25) {
     baseExercises.push({
       name: "Burpees or Jumping Jacks",

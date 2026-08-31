@@ -2,10 +2,13 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, Bell, Search, User, Sparkles, X } from "lucide-react";
+import { Menu, Bell, Search, User, Sparkles, X, Dumbbell } from "lucide-react";
 import { GlassCard } from "@/components/ui/glass-card";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { LanguageSelector } from "@/components/i18n/language-selector";
+import { OjasLiteToggle } from "@/components/fitness/ojas-lite-toggle";
+import { useTranslation } from "@/lib/i18n";
 
 interface TopNavProps {
   onMenuClick: () => void;
@@ -14,9 +17,10 @@ interface TopNavProps {
   notificationCount?: number;
 }
 
-export function TopNav({ onMenuClick, userName = "User", userAvatar, notificationCount = 0 }: TopNavProps) {
+export function TopNav({ onMenuClick, userName = "Anil Kumar", userAvatar, notificationCount = 0 }: TopNavProps) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const { t } = useTranslation();
 
   return (
     <motion.header
@@ -36,15 +40,15 @@ export function TopNav({ onMenuClick, userName = "User", userAvatar, notificatio
             <Menu className="h-5 w-5" />
           </Button>
           <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-[var(--accent)] to-[var(--accent-strong)] flex items-center justify-center">
-              <Sparkles className="h-4 w-4 text-white" />
+            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-[#adc6ff] to-[#4d8eff] flex items-center justify-center text-black">
+              <Dumbbell className="h-4 w-4" />
             </div>
-            <span className="font-bold text-[var(--foreground)] hidden sm:block">Titan</span>
+            <span className="font-bold text-[var(--foreground)] hidden sm:block">Ojas AI</span>
           </div>
         </div>
 
         {/* Center: Search (desktop) */}
-        <div className="hidden md:flex flex-1 max-w-md mx-8">
+        <div className="hidden md:flex flex-1 max-w-md mx-6">
           <div className="relative w-full">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--foreground-muted)]" />
             <input
@@ -56,7 +60,15 @@ export function TopNav({ onMenuClick, userName = "User", userAvatar, notificatio
         </div>
 
         {/* Right: Actions */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5">
+          {/* Ojas Lite Mode Toggle */}
+          <div className="hidden sm:block">
+            <OjasLiteToggle />
+          </div>
+
+          {/* Centralized Language Selector */}
+          <LanguageSelector />
+
           {/* Search (mobile) */}
           <Button
             variant="ghost"
@@ -101,45 +113,15 @@ export function TopNav({ onMenuClick, userName = "User", userAvatar, notificatio
             </AnimatePresence>
           </div>
 
-          {/* Profile */}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="gap-2"
-          >
-            <Avatar src={userAvatar} name={userName} size="sm" />
-            <span className="hidden sm:block text-sm font-medium">{userName}</span>
-          </Button>
+          {/* User Profile */}
+          <div className="flex items-center gap-2 pl-2 border-l border-[var(--border)]">
+            <Avatar name={userName} size="sm" />
+            <span className="text-xs font-semibold text-[var(--foreground)] hidden xl:block">
+              {userName}
+            </span>
+          </div>
         </div>
       </div>
-
-      {/* Mobile Search */}
-      <AnimatePresence>
-        {searchOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="md:hidden mt-3 overflow-hidden"
-          >
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--foreground-muted)]" />
-              <input
-                type="text"
-                placeholder="Search..."
-                autoFocus
-                className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] text-sm placeholder:text-[var(--foreground-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
-              />
-              <button
-                onClick={() => setSearchOpen(false)}
-                className="absolute right-3 top-1/2 -translate-y-1/2"
-              >
-                <X className="h-4 w-4 text-[var(--foreground-muted)]" />
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </motion.header>
   );
 }

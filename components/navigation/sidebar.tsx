@@ -21,8 +21,6 @@ import {
   Crown,
   ShieldCheck,
   LogOut,
-  UserCircle2,
-  BellRing,
   Search,
   ShoppingCart,
   BookOpen,
@@ -33,8 +31,6 @@ import {
   Apple,
   Moon,
   ShieldAlert,
-  Calendar,
-  History,
   GitCompareArrows,
   Scale,
   Award,
@@ -43,78 +39,17 @@ import {
 import { GlassCard } from "@/components/ui/glass-card";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { useTranslation } from "@/lib/i18n";
+import { TranslationDictionary } from "@/lib/i18n/types";
 
-interface NavItem {
-  label: string;
+interface NavItemConfig {
+  key?: keyof TranslationDictionary;
+  defaultLabel: string;
   icon: any;
   href: string;
   badge?: string;
   premium?: boolean;
 }
-
-const navItems: NavItem[] = [
-  { label: "Dashboard", icon: Activity, href: "/dashboard" },
-  { label: "Workouts", icon: Dumbbell, href: "/workouts" },
-  { label: "  • Workout Home", icon: Dumbbell, href: "/workouts?tab=dashboard" },
-  { label: "  • AI Generator", icon: Sparkles, href: "/workouts?tab=generator" },
-  { label: "  • Exercise Library", icon: Search, href: "/workouts?tab=library" },
-  { label: "  • Personal Records", icon: Trophy, href: "/workouts?tab=history" },
-  { label: "Nutrition", icon: UtensilsCrossed, href: "/nutrition" },
-  { label: "  • Nutrition Dashboard", icon: Apple, href: "/nutrition?tab=dashboard" },
-  { label: "  • AI Meal Planner", icon: Sparkles, href: "/nutrition?tab=planner" },
-  { label: "  • Food & Scanner Log", icon: Camera, href: "/nutrition?tab=scanner" },
-  { label: "  • AI Dietitian Coach", icon: UtensilsCrossed, href: "/nutrition?tab=coach" },
-  { label: "  • Grocery List", icon: ShoppingCart, href: "/nutrition?tab=grocery" },
-  { label: "  • Recipe Maker", icon: BookOpen, href: "/nutrition?tab=recipes" },
-  { label: "  • Water Tracker", icon: Waves, href: "/nutrition?tab=water" },
-  { label: "  • Nutrition Analytics", icon: TrendingUp, href: "/nutrition?tab=analytics" },
-  { label: "  • Restaurant Dining", icon: MapPin, href: "/nutrition?tab=restaurant" },
-  { label: "  • Smart Alerts", icon: Bell, href: "/nutrition?tab=notifications" },
-  { label: "Analytics & Insights Hub", icon: BarChart3, href: "/progress" },
-  { label: "Recovery", icon: HeartPulse, href: "/recovery" },
-  { label: "  • Recovery Dashboard", icon: Activity, href: "/recovery?tab=dashboard" },
-  { label: "  • Sleep Analysis", icon: Moon, href: "/recovery?tab=sleep" },
-  { label: "  • DOMS Tracker", icon: ShieldAlert, href: "/recovery?tab=doms" },
-  { label: "  • Mobility", icon: Activity, href: "/recovery?tab=mobility" },
-  { label: "  • Stretching", icon: HeartPulse, href: "/recovery?tab=stretching" },
-  { label: "  • Rest Day Planner", icon: Moon, href: "/recovery?tab=rest-day" },
-  { label: "  • Decision Engine", icon: GitCompareArrows, href: "/recovery?tab=decision" },
-  { label: "  • Recovery Budget", icon: Scale, href: "/recovery?tab=budget" },
-  { label: "  • Weekly Review", icon: Award, href: "/recovery?tab=review" },
-  { label: "  • Analytics", icon: BarChart3, href: "/recovery?tab=analytics" },
-  { label: "AI Coach", icon: Sparkles, href: "/coach", badge: "AI" },
-  { label: "  • Coach Home", icon: Sparkles, href: "/coach?tab=home" },
-  { label: "  • Chat Coach", icon: Sparkles, href: "/coach?tab=chat" },
-  { label: "  • Voice Assistant", icon: Sparkles, href: "/coach?tab=voice" },
-  { label: "  • AI Plans", icon: Sparkles, href: "/coach?tab=plans" },
-  { label: "  • AI Insights", icon: Sparkles, href: "/coach?tab=insights" },
-  { label: "  • Memory Vault", icon: Sparkles, href: "/coach?tab=memory" },
-  { label: "Form Coach", icon: Camera, href: "/form-coach", badge: "CV" },
-  { label: "  • Workout Camera", icon: Camera, href: "/workout-camera" },
-  { label: "  • Workout Replay", icon: Play, href: "/form-coach?tab=replay" },
-  { label: "  • Movement Analytics", icon: BarChart3, href: "/form-coach?tab=progress" },
-  { label: "  • Biomechanics Lab", icon: Activity, href: "/biomechanics" },
-  { label: "  • Motion Laboratory", icon: Activity, href: "/motion-lab" },
-  { label: "Vision Lens", icon: Camera, href: "/vision", premium: true },
-  { label: "Music", icon: Music, href: "/music" },
-  { label: "Community", icon: Users, href: "/community" },
-  { label: "Motivation & Habits", icon: Trophy, href: "/motivation" },
-  { label: "Premium", icon: Crown, href: "/premium", premium: true },
-  { label: "  • Future Simulator", icon: Activity, href: "/premium/future-simulator", premium: true },
-  { label: "  • AI Digital Twin", icon: Activity, href: "/premium/digital-twin", premium: true },
-  { label: "  • Injury Risk Audit", icon: Activity, href: "/premium/injury-risk", premium: true },
-  { label: "  • BI Analytics", icon: Activity, href: "/premium/analytics", premium: true },
-  { label: "  • Wearable Sync", icon: Activity, href: "/premium/wearables", premium: true },
-  { label: "  • AI Meal Planner", icon: Activity, href: "/premium/meal-ai", premium: true },
-  { label: "  • Weekly Calendar", icon: Activity, href: "/premium/weekly-planner", premium: true },
-  { label: "  • Smart Alert Suite", icon: Activity, href: "/premium/notifications", premium: true },
-  { label: "  • Visual Automations", icon: Activity, href: "/premium/automation", premium: true },
-];
-
-const bottomItems: NavItem[] = [
-  { label: "Settings", icon: Settings, href: "/settings" },
-  { label: "Admin", icon: ShieldCheck, href: "/admin" },
-];
 
 interface SidebarProps {
   isOpen: boolean;
@@ -126,10 +61,52 @@ interface SidebarProps {
 export function Sidebar({ isOpen, onClose, userName = "User", userAvatar }: SidebarProps) {
   const pathname = usePathname();
   const [searchQuery, setSearchQuery] = useState("");
+  const { t } = useTranslation();
 
-  const filteredItems = navItems.filter((item) =>
-    item.label.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const navItems: NavItemConfig[] = [
+    { key: "nav_dashboard", defaultLabel: "Dashboard", icon: Activity, href: "/dashboard" },
+    { key: "nav_sports_performance" as any, defaultLabel: "Sports & Performance", icon: Trophy, href: "/sports", badge: "NEW" },
+    { key: "nav_workouts", defaultLabel: "Workouts", icon: Dumbbell, href: "/workouts" },
+    { key: "nav_workout_home", defaultLabel: "Workout Home", icon: Dumbbell, href: "/workouts?tab=dashboard" },
+    { key: "nav_ai_generator", defaultLabel: "AI Generator", icon: Sparkles, href: "/workouts?tab=generator" },
+    { key: "nav_exercise_library", defaultLabel: "Exercise Library", icon: Search, href: "/workouts?tab=library" },
+    { key: "nav_prs", defaultLabel: "Personal Records", icon: Trophy, href: "/workouts?tab=history" },
+    { key: "nav_nutrition", defaultLabel: "Nutrition", icon: UtensilsCrossed, href: "/nutrition" },
+    { key: "nav_nutrition_dashboard", defaultLabel: "Nutrition Dashboard", icon: Apple, href: "/nutrition?tab=dashboard" },
+    { key: "nav_meal_planner", defaultLabel: "AI Meal Planner", icon: Sparkles, href: "/nutrition?tab=planner" },
+    { key: "nav_food_scanner", defaultLabel: "Food & Scanner Log", icon: Camera, href: "/nutrition?tab=scanner" },
+    { key: "nav_ai_dietitian", defaultLabel: "AI Dietitian Coach", icon: UtensilsCrossed, href: "/nutrition?tab=coach" },
+    { key: "nav_grocery", defaultLabel: "Grocery List", icon: ShoppingCart, href: "/nutrition?tab=grocery" },
+    { key: "nav_recipes", defaultLabel: "Recipe Maker", icon: BookOpen, href: "/nutrition?tab=recipes" },
+    { key: "nav_water_tracker", defaultLabel: "Water Tracker", icon: Waves, href: "/nutrition?tab=water" },
+    { key: "nav_nutrition_analytics", defaultLabel: "Nutrition Analytics", icon: TrendingUp, href: "/nutrition?tab=analytics" },
+    { key: "nav_restaurant_dining", defaultLabel: "Restaurant Dining", icon: MapPin, href: "/nutrition?tab=restaurant" },
+    { key: "nav_smart_alerts", defaultLabel: "Smart Alerts", icon: Bell, href: "/nutrition?tab=notifications" },
+    { key: "nav_analytics", defaultLabel: "Analytics & Insights Hub", icon: BarChart3, href: "/progress" },
+    { key: "nav_recovery", defaultLabel: "Recovery", icon: HeartPulse, href: "/recovery" },
+    { key: "nav_recovery_dashboard", defaultLabel: "Recovery Dashboard", icon: Activity, href: "/recovery?tab=dashboard" },
+    { key: "nav_sleep_analysis", defaultLabel: "Sleep Analysis", icon: Moon, href: "/recovery?tab=sleep" },
+    { key: "nav_doms_tracker", defaultLabel: "DOMS Soreness", icon: ShieldAlert, href: "/recovery?tab=doms" },
+    { key: "nav_mobility", defaultLabel: "Mobility", icon: Activity, href: "/recovery?tab=mobility" },
+    { key: "nav_stretching", defaultLabel: "Stretching", icon: HeartPulse, href: "/recovery?tab=stretching" },
+    { key: "nav_rest_day", defaultLabel: "Rest Day Planner", icon: Moon, href: "/recovery?tab=rest-day" },
+    { key: "nav_ai_coach", defaultLabel: "AI Fitness Coach", icon: Sparkles, href: "/coach", badge: "AI" },
+    { key: "nav_form_coach", defaultLabel: "Smart Form Coach", icon: Camera, href: "/form-coach", badge: "CV" },
+    { key: "nav_digital_twin", defaultLabel: "AI Digital Twin", icon: Sparkles, href: "/twin" },
+    { key: "nav_sports_performance" as any, defaultLabel: "Sports & Performance", icon: Trophy, href: "/sports", badge: "NEW" },
+    { key: "nav_community", defaultLabel: "Community", icon: Users, href: "/community" },
+    { key: "nav_achievements", defaultLabel: "Achievements", icon: Trophy, href: "/achievements" },
+    { key: "nav_sih_demo", defaultLabel: "SIH Demo Mode", icon: Sparkles, href: "/adaptive-demo" },
+  ];
+
+  const bottomItems: NavItemConfig[] = [
+    { key: "nav_settings", defaultLabel: "Settings", icon: Settings, href: "/settings" },
+  ];
+
+  const filteredItems = navItems.filter((item) => {
+    const label = item.key ? t(item.key, item.defaultLabel) : item.defaultLabel;
+    return label.toLowerCase().includes(searchQuery.toLowerCase());
+  });
 
   return (
     <AnimatePresence>
@@ -155,12 +132,12 @@ export function Sidebar({ isOpen, onClose, userName = "User", userAvatar }: Side
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-[var(--border)]">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-[var(--accent)] to-[var(--accent-strong)] flex items-center justify-center">
+                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-[#4d8eff] to-[#1e50ff] flex items-center justify-center shadow-lg shadow-blue-500/20">
                   <Activity className="h-5 w-5 text-white" />
                 </div>
                 <div>
-                  <h1 className="font-bold text-[var(--foreground)]">Titan</h1>
-                  <p className="text-xs text-[var(--foreground-muted)]">AI Fitness OS</p>
+                  <h1 className="font-bold text-[var(--foreground)] text-lg">Ojas AI</h1>
+                  <p className="text-xs text-[var(--foreground-muted)]">Fitness Operating System</p>
                 </div>
               </div>
               <button
@@ -177,7 +154,7 @@ export function Sidebar({ isOpen, onClose, userName = "User", userAvatar }: Side
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--foreground-muted)]" />
                 <input
                   type="text"
-                  placeholder="Search..."
+                  placeholder={t("common_loading", "Search...")}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] text-sm placeholder:text-[var(--foreground-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
@@ -191,6 +168,8 @@ export function Sidebar({ isOpen, onClose, userName = "User", userAvatar }: Side
                 {filteredItems.map((item) => {
                   const Icon = item.icon;
                   const isActive = pathname === item.href;
+                  const label = item.key ? t(item.key, item.defaultLabel) : item.defaultLabel;
+
                   return (
                     <Link
                       key={item.href}
@@ -198,12 +177,12 @@ export function Sidebar({ isOpen, onClose, userName = "User", userAvatar }: Side
                       onClick={onClose}
                       className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all group ${
                         isActive
-                          ? "bg-[var(--accent-glow)] text-[var(--accent)]"
+                          ? "bg-[var(--accent-glow)] text-[var(--accent)] font-semibold"
                           : "text-[var(--foreground-muted)] hover:bg-[var(--surface)] hover:text-[var(--foreground)]"
                       }`}
                     >
                       <Icon className={`h-5 w-5 ${isActive ? "text-[var(--accent)]" : ""}`} />
-                      <span className="flex-1 text-sm font-medium">{item.label}</span>
+                      <span className="flex-1 text-sm font-medium">{label}</span>
                       {item.badge && (
                         <Badge variant="primary" label={item.badge} />
                       )}
@@ -221,6 +200,8 @@ export function Sidebar({ isOpen, onClose, userName = "User", userAvatar }: Side
                   {bottomItems.map((item) => {
                     const Icon = item.icon;
                     const isActive = pathname === item.href;
+                    const label = item.key ? t(item.key, item.defaultLabel) : item.defaultLabel;
+
                     return (
                       <Link
                         key={item.href}
@@ -228,12 +209,12 @@ export function Sidebar({ isOpen, onClose, userName = "User", userAvatar }: Side
                         onClick={onClose}
                         className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
                           isActive
-                            ? "bg-[var(--accent-glow)] text-[var(--accent)]"
+                            ? "bg-[var(--accent-glow)] text-[var(--accent)] font-semibold"
                             : "text-[var(--foreground-muted)] hover:bg-[var(--surface)] hover:text-[var(--foreground)]"
                         }`}
                       >
                         <Icon className="h-5 w-5" />
-                        <span className="text-sm font-medium">{item.label}</span>
+                        <span className="text-sm font-medium">{label}</span>
                       </Link>
                     );
                   })}
@@ -245,14 +226,11 @@ export function Sidebar({ isOpen, onClose, userName = "User", userAvatar }: Side
             <div className="p-4 border-t border-[var(--border)]">
               <GlassCard className="p-4">
                 <div className="flex items-center gap-3">
-                  <Avatar src={userAvatar} name={userName} size="md" />
+                  <Avatar name={userName} size="md" />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-[var(--foreground)] truncate">{userName}</p>
-                    <p className="text-xs text-[var(--foreground-muted)]">Free Plan</p>
+                    <p className="text-xs text-[var(--foreground-muted)]">Ojas Core</p>
                   </div>
-                  <button className="p-2 rounded-lg hover:bg-[var(--surface)] transition-colors">
-                    <LogOut className="h-4 w-4 text-[var(--foreground-muted)]" />
-                  </button>
                 </div>
               </GlassCard>
             </div>

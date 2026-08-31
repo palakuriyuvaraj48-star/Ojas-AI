@@ -12,6 +12,8 @@ import {
   Dumbbell, Trophy, Video, Mic, RefreshCcw, BarChart3, Clock, Camera
 } from "lucide-react";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { useTranslation } from "@/lib/i18n";
+import { TranslationDictionary } from "@/lib/i18n/types";
 
 interface Exercise {
   id: string;
@@ -34,6 +36,7 @@ interface Exercise {
 
 export function WorkoutView() {
   const { profile, activeWorkout, toggleExercise, completeWorkout, setWorkoutId, streak } = useFitness();
+  const { t } = useTranslation();
   
   // Navigation Routing Tabs
   const [activeTab, setActiveTab] = useState<string>("dashboard");
@@ -273,14 +276,15 @@ export function WorkoutView() {
       {/* Main Tab Navigation Bar */}
       <div className="flex gap-2 overflow-x-auto pb-2 border-b border-white/10">
         {[
-          { id: "dashboard", label: "Workout Dashboard", icon: Dumbbell },
-          { id: "generator", label: "AI Generator", icon: Sparkles },
-          { id: "library", label: "Exercise Library", icon: Search },
-          { id: "player", label: "Active Player", icon: Play },
-          { id: "history", label: "Records & History", icon: Trophy },
-          { id: "analytics", label: "Muscle Analytics", icon: BarChart3 }
+          { id: "dashboard", key: "nav_workout_home" as keyof TranslationDictionary, label: "Workout Dashboard", icon: Dumbbell },
+          { id: "generator", key: "nav_ai_generator" as keyof TranslationDictionary, label: "AI Generator", icon: Sparkles },
+          { id: "library", key: "nav_exercise_library" as keyof TranslationDictionary, label: "Exercise Library", icon: Search },
+          { id: "player", key: "workout_start" as keyof TranslationDictionary, label: "Active Player", icon: Play },
+          { id: "history", key: "nav_prs" as keyof TranslationDictionary, label: "Records & History", icon: Trophy },
+          { id: "analytics", key: "nav_analytics" as keyof TranslationDictionary, label: "Muscle Analytics", icon: BarChart3 }
         ].map((tab) => {
           const Icon = tab.icon;
+          const label = tab.key ? t(tab.key, tab.label) : tab.label;
           return (
             <button
               key={tab.id}
@@ -292,7 +296,7 @@ export function WorkoutView() {
               }`}
             >
               <Icon className="h-4 w-4" />
-              {tab.label}
+              {label}
             </button>
           );
         })}

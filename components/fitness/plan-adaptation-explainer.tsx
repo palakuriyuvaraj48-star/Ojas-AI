@@ -120,7 +120,7 @@ function AdaptationCard({ adaptation }: { adaptation: AdaptationRecommendation }
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 bg-blue-400 rounded-full mt-1" />
           <div className="font-semibold text-sm text-white capitalize">
-            {adaptation.type.replace("-", " ")}
+            {(adaptation.type || "").replace(/-/g, " ")}
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -157,7 +157,7 @@ function AdaptationCard({ adaptation }: { adaptation: AdaptationRecommendation }
               key={idx}
               className="text-xs bg-slate-700/50 text-slate-300 px-2 py-1 rounded"
             >
-              {factor.replace("_", " ")}
+              {(factor || "").replace(/_/g, " ")}
             </span>
           ))}
         </div>

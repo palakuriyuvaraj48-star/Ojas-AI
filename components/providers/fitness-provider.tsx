@@ -57,7 +57,7 @@ interface FitnessContextType {
   } | null;
   streak: number;
   isOnboarded: boolean;
-  updateProfile: (profile: ClientProfile) => void;
+  updateProfile: (profile: Partial<ClientProfile>) => void;
   logFood: (calories: number, protein: number, carbs: number, fat: number, fiber?: number) => void;
   logWater: (liters: number) => void;
   logSteps: (steps: number) => void;
@@ -74,13 +74,38 @@ const FitnessContext = createContext<FitnessContextType | undefined>(undefined);
 // A useful workspace should be useful on first launch. Local data, when present,
 // still takes precedence in the hydration effect below.
 const demoProfile: ClientProfile = {
-  age: 29, gender: "female", height: 168, weight: 64.2, goal: "lean-bulk",
-  bodyFat: 22.4, activityLevel: "moderately-active", gymExperience: "intermediate",
-  dailyStepGoal: 9000, occupation: "Product designer", workoutDaysPerWeek: 4,
-  medicalConditions: "None", injuries: "None", foodPreference: "both", allergies: "None",
-  budget: "moderate", sleepDuration: 7.4, stressLevel: "medium",
-  availableEquipment: ["Barbell", "Dumbbells", "Cable machine"], lifestyle: "Active professional",
-  neckCircumference: 32, legCircumference: 55, targetWeight: 66, timelineWeeks: 12,
+  name: "Anil Kumar",
+  age: 22,
+  gender: "male",
+  height: 174,
+  weight: 68.5,
+  goal: "fat-loss",
+  bodyFat: 18.5,
+  activityLevel: "moderately-active",
+  gymExperience: "intermediate",
+  dailyStepGoal: 8500,
+  occupation: "College Student",
+  workoutDaysPerWeek: 4,
+  availableWorkoutTime: 35,
+  medicalConditions: "None",
+  injuries: "None",
+  foodPreference: "both",
+  allergies: "None",
+  budget: "budget",
+  dailyFoodBudget: 100,
+  sleepDuration: 7.4,
+  stressLevel: "medium",
+  availableEquipment: ["Bodyweight", "Dumbbells"],
+  lifestyle: "Hostel resident, college schedule, mess dining",
+  lifestyleRole: "college-student",
+  foodEnvironment: "hostel-mess",
+  workoutEnvironment: "home",
+  isHostelMode: true,
+  neckCircumference: 36,
+  legCircumference: 56,
+  targetWeight: 65,
+  timelineWeeks: 12,
+  language: "en",
 };
 
 export function FitnessProvider({ children }: { children: React.ReactNode }) {
@@ -118,33 +143,43 @@ export function FitnessProvider({ children }: { children: React.ReactNode }) {
   // Calculate Streak
   const [streak, setStreak] = useState<number>(12);
 
-  const calculateLBM = (p: ClientProfile) => {
+  const calculateLBM = (p: Partial<ClientProfile>) => {
+    const weight = p.weight ?? 68.5;
+    const height = p.height ?? 174;
+    const gender = p.gender ?? "male";
     if (p.bodyFat && p.bodyFat > 0) {
-      return p.weight * (1 - p.bodyFat / 100);
+      return weight * (1 - p.bodyFat / 100);
     }
     // Boer Formula
-    if (p.gender === "male") {
-      return 0.407 * p.weight + 0.267 * p.height - 19.2;
+    if (gender === "male") {
+      return 0.407 * weight + 0.267 * height - 19.2;
     } else {
-      return 0.252 * p.weight + 0.473 * p.height - 48.3;
+      return 0.252 * weight + 0.473 * height - 48.3;
     }
   };
 
-  const calculateTDEE = (p: ClientProfile) => {
+  const calculateTDEE = (p: Partial<ClientProfile>) => {
+    const weight = p.weight ?? 68.5;
+    const height = p.height ?? 174;
+    const age = p.age ?? 22;
+    const gender = p.gender ?? "male";
+    const activityLevel = p.activityLevel ?? "moderately-active";
+
     let bmrVal = 0;
-    if (p.gender === "male") {
-      bmrVal = 10 * p.weight + 6.25 * p.height - 5 * p.age + 5;
+    if (gender === "male") {
+      bmrVal = 10 * weight + 6.25 * height - 5 * age + 5;
     } else {
-      bmrVal = 10 * p.weight + 6.25 * p.height - 5 * p.age - 161;
+      bmrVal = 10 * weight + 6.25 * height - 5 * age - 161;
     }
 
     let factor = 1.2;
-    switch (p.activityLevel) {
+    switch (activityLevel) {
       case "sedentary": factor = 1.2; break;
       case "lightly-active": factor = 1.375; break;
       case "moderately-active": factor = 1.55; break;
       case "very-active": factor = 1.725; break;
       case "extra-active": factor = 1.9; break;
+      default: factor = 1.55; break;
     }
 
     return bmrVal * factor;
@@ -156,8 +191,14 @@ export function FitnessProvider({ children }: { children: React.ReactNode }) {
   let macroTargets: FitnessContextType["macroTargets"] = null;
 
   if (profile) {
-    const hMeters = profile.height / 100;
-    const bmi = profile.weight / (hMeters * hMeters);
+    const height = profile.height ?? 174;
+    const weight = profile.weight ?? 68.5;
+    const age = profile.age ?? 22;
+    const gender = profile.gender ?? "male";
+    const goal = profile.goal ?? "fat-loss";
+
+    const hMeters = (height || 174) / 100;
+    const bmi = weight / (hMeters * hMeters);
     const healthyWeightRange = {
       min: 18.5 * hMeters * hMeters,
       max: 24.9 * hMeters * hMeters,
@@ -165,8 +206,8 @@ export function FitnessProvider({ children }: { children: React.ReactNode }) {
     
     let estBF = profile.bodyFat || 0;
     if (!estBF) {
-      const gFactor = profile.gender === "male" ? 1 : 0;
-      estBF = (1.20 * bmi) + (0.23 * profile.age) - (10.8 * gFactor) - 5.4;
+      const gFactor = gender === "male" ? 1 : 0;
+      estBF = (1.20 * bmi) + (0.23 * age) - (10.8 * gFactor) - 5.4;
       if (estBF < 3) estBF = 3;
     }
 
@@ -174,7 +215,7 @@ export function FitnessProvider({ children }: { children: React.ReactNode }) {
     const ffmi = lbm / (hMeters * hMeters);
     
     let ffmiCategory = "Average";
-    if (profile.gender === "male") {
+    if (gender === "male") {
       if (ffmi >= 25) ffmiCategory = "Steroid-like baseline / Elite Genetic Upper Limit";
       else if (ffmi >= 22) ffmiCategory = "Excellent (Highly Trained)";
       else if (ffmi >= 20) ffmiCategory = "Above Average";
@@ -188,13 +229,13 @@ export function FitnessProvider({ children }: { children: React.ReactNode }) {
       else ffmiCategory = "Below Average";
     }
 
-    const bmr = profile.gender === "male"
-      ? (10 * profile.weight + 6.25 * profile.height - 5 * profile.age + 5)
-      : (10 * profile.weight + 6.25 * profile.height - 5 * profile.age - 161);
+    const bmr = gender === "male"
+      ? (10 * weight + 6.25 * height - 5 * age + 5)
+      : (10 * weight + 6.25 * height - 5 * age - 161);
 
     const tdee = calculateTDEE(profile);
     
-    const metabolicRatio = tdee / bmr;
+    const metabolicRatio = tdee / (bmr || 1);
     let metabolicCategory = "Standard metabolism";
     if (metabolicRatio > 1.65) metabolicCategory = "Highly Active / Hyper-metabolic";
     else if (metabolicRatio < 1.35) metabolicCategory = "Sedentary / Adaptive Downregulation Risk";
@@ -214,20 +255,20 @@ export function FitnessProvider({ children }: { children: React.ReactNode }) {
 
     const maintenance = Math.round(tdee);
     let fatLoss = Math.round(tdee - 450);
-    const minCalories = profile.gender === "male" ? 1500 : 1200;
+    const minCalories = gender === "male" ? 1500 : 1200;
     if (fatLoss < minCalories) fatLoss = minCalories;
 
     const leanBulk = Math.round(tdee + 250);
     const muscleGain = Math.round(tdee + 350);
 
     let activeTarget = maintenance;
-    if (profile.goal === "fat-loss") activeTarget = fatLoss;
-    else if (profile.goal === "lean-bulk") activeTarget = leanBulk;
-    else if (profile.goal === "muscle-gain") activeTarget = muscleGain;
+    if (goal === "fat-loss") activeTarget = fatLoss;
+    else if (goal === "lean-bulk") activeTarget = leanBulk;
+    else if (goal === "muscle-gain") activeTarget = muscleGain;
 
     if (checkInHistory.length > 0) {
       const latestCheckIn = checkInHistory[checkInHistory.length - 1];
-      activeTarget = activeTarget + latestCheckIn.adjustments.calorieDelta;
+      activeTarget = activeTarget + (latestCheckIn?.adjustments?.calorieDelta || 0);
     }
 
     calorieTargets = {
@@ -239,15 +280,15 @@ export function FitnessProvider({ children }: { children: React.ReactNode }) {
     };
 
     let proteinGrams = 0;
-    if (profile.goal === "fat-loss") {
+    if (goal === "fat-loss") {
       proteinGrams = Math.round(lbm * 2.3);
     } else {
-      proteinGrams = Math.round(profile.weight * 2.0);
+      proteinGrams = Math.round(weight * 2.0);
     }
-    proteinGrams = Math.max(120, Math.min(proteinGrams, Math.round(profile.weight * 2.5)));
+    proteinGrams = Math.max(120, Math.min(proteinGrams, Math.round(weight * 2.5)));
     
     let fatGrams = Math.round((activeTarget * 0.25) / 9);
-    const minFat = Math.round(profile.weight * 0.7);
+    const minFat = Math.round(weight * 0.7);
     if (fatGrams < minFat) fatGrams = minFat;
 
     const proteinCal = proteinGrams * 4;
@@ -265,20 +306,20 @@ export function FitnessProvider({ children }: { children: React.ReactNode }) {
       protein: {
         grams: proteinGrams,
         calories: proteinGrams * 4,
-        pct: Math.round((proteinGrams * 4 / actualTotalCal) * 100),
+        pct: Math.round((proteinGrams * 4 / (actualTotalCal || 1)) * 100),
       },
       fat: {
         grams: fatGrams,
         calories: fatGrams * 9,
-        pct: Math.round((fatGrams * 9 / actualTotalCal) * 100),
+        pct: Math.round((fatGrams * 9 / (actualTotalCal || 1)) * 100),
       },
       carbs: {
         grams: carbGrams,
         calories: carbGrams * 4,
-        pct: Math.round((carbGrams * 4 / actualTotalCal) * 100),
+        pct: Math.round((carbGrams * 4 / (actualTotalCal || 1)) * 100),
       },
       fiber: Math.round((activeTarget / 1000) * 14),
-      water: Number((0.035 * profile.weight).toFixed(1)),
+      water: Number((0.035 * weight).toFixed(1)),
       sodium: "1,500 - 2,300 mg (ACSM standard, adjust for sweating)",
     };
   }
@@ -292,8 +333,16 @@ export function FitnessProvider({ children }: { children: React.ReactNode }) {
       const storedChat = localStorage.getItem("lumina_chat");
 
       if (storedProfile) {
-        setProfileState(JSON.parse(storedProfile));
-        setIsOnboarded(true);
+        const parsedProfile = JSON.parse(storedProfile);
+        if (parsedProfile && typeof parsedProfile === "object") {
+          setProfileState({
+            ...demoProfile,
+            ...parsedProfile,
+            goal: parsedProfile.goal || demoProfile.goal || "fat-loss",
+            activityLevel: parsedProfile.activityLevel || demoProfile.activityLevel || "moderately-active",
+          });
+          setIsOnboarded(true);
+        }
       }
       if (storedLogs) {
         const parsedLogs = JSON.parse(storedLogs) as DailyLog[];
@@ -370,30 +419,51 @@ export function FitnessProvider({ children }: { children: React.ReactNode }) {
   }, [logsHistory, dailyLog]);
 
   // Save profile and compute updates
-  const updateProfile = (newProfile: ClientProfile) => {
-    setProfileState(newProfile);
-    setIsOnboarded(true);
-    localStorage.setItem("lumina_profile", JSON.stringify(newProfile));
-
-    // Seed chat history if onboarding for the first time
-    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    const welcome: Message[] = [
-      {
-        sender: "coach",
-        text: `Onboarding completed! Welcome, client. Based on your profile (${newProfile.weight}kg, aiming for ${newProfile.goal.replace("-", " ")}), I have computed your exact metabolic baseline and custom workout splits.`,
-        timestamp: time,
-      },
-      {
-        sender: "coach",
-        text: `Your daily TDEE is approximately ${Math.round(calculateTDEE(newProfile))} kcal. I have loaded a custom layout for you in the Dashboard and Food Scanner. Let me know if you have any questions!`,
-        timestamp: time,
+  const updateProfile = (updatedFields: Partial<ClientProfile>) => {
+    let mergedProfile: ClientProfile = demoProfile;
+    setProfileState((prev) => {
+      mergedProfile = {
+        ...(prev || demoProfile),
+        ...updatedFields,
+      };
+      try {
+        localStorage.setItem("lumina_profile", JSON.stringify(mergedProfile));
+      } catch (e) {
+        console.error("Error saving profile to localStorage", e);
       }
-    ];
-    setChatHistory((prev) => {
-      const updated = [...prev, ...welcome];
-      localStorage.setItem("lumina_chat", JSON.stringify(updated));
-      return updated;
+      return mergedProfile;
     });
+
+    const isFirstTime = !isOnboarded;
+    setIsOnboarded(true);
+
+    // Seed chat history only if onboarding for the very first time
+    if (isFirstTime) {
+      const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const currentGoal = (updatedFields.goal || profile?.goal || "maintenance").replace("-", " ");
+      const currentWeight = updatedFields.weight ?? profile?.weight ?? 68.5;
+      const welcome: Message[] = [
+        {
+          sender: "coach",
+          text: `Onboarding completed! Welcome, client. Based on your profile (${currentWeight}kg, aiming for ${currentGoal}), I have computed your exact metabolic baseline and custom workout splits.`,
+          timestamp: time,
+        },
+        {
+          sender: "coach",
+          text: `Your daily TDEE is approximately ${Math.round(calculateTDEE(mergedProfile))} kcal. I have loaded a custom layout for you in the Dashboard and Food Scanner. Let me know if you have any questions!`,
+          timestamp: time,
+        }
+      ];
+      setChatHistory((prev) => {
+        const updated = [...prev, ...welcome];
+        try {
+          localStorage.setItem("lumina_chat", JSON.stringify(updated));
+        } catch (e) {
+          console.error("Error saving chat history to localStorage", e);
+        }
+        return updated;
+      });
+    }
   };
 
   const saveDailyLog = (updatedLog: DailyLog) => {
@@ -921,7 +991,8 @@ function getCoachReply(input: string, profile: ClientProfile | null): string {
   }
   
   if (query.includes("protein") || query.includes("macro") || query.includes("carbs") || query.includes("fat")) {
-    return `Protein is critical for muscle retention during your **${profile.goal.replace("-", " ")}** phase. \n\nAim for high-quality sources:\n* **Egg whites, Chicken breast, Lean beef** (Non-vegetarian)\n* **Paneer, Tofu, Soy chunks, Tempeh, Lentils** (Vegetarian / Indian options)\n\nCarbohydrates fuel anaerobic training. Keep them high on training days! Fats support critical hormonal function. Keep fat intake above 0.7g/kg of body weight.`;
+    const goalStr = (profile.goal || "maintenance").replace("-", " ");
+    return `Protein is critical for muscle retention during your **${goalStr}** phase. \n\nAim for high-quality sources:\n* **Egg whites, Chicken breast, Lean beef** (Non-vegetarian)\n* **Paneer, Tofu, Soy chunks, Tempeh, Lentils** (Vegetarian / Indian options)\n\nCarbohydrates fuel anaerobic training. Keep them high on training days! Fats support critical hormonal function. Keep fat intake above 0.7g/kg of body weight.`;
   }
 
   if (query.includes("workout") || query.includes("train") || query.includes("lift") || query.includes("exercise")) {

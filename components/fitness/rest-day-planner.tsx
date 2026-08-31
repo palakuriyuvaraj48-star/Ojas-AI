@@ -41,7 +41,7 @@ export function RestDayPlanner({ recoveryScore = 70, fatigue = 40 }: { recoveryS
         <div className="flex justify-between items-start">
           <div>
             <span className="text-[10px] font-bold text-[var(--foreground-muted)] uppercase tracking-wider block">Rest Day Recommendation</span>
-            <h4 className="text-2xl font-black text-white mt-1 capitalize">{plan.recommendation.replace("-", " ")}</h4>
+            <h4 className="text-2xl font-black text-white mt-1 capitalize">{(plan?.recommendation || "").replace(/-/g, " ")}</h4>
           </div>
           <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400">
             <HeartPulse className="h-5 w-5" />
@@ -73,7 +73,7 @@ export function RestDayPlanner({ recoveryScore = 70, fatigue = 40 }: { recoveryS
           <div className="flex flex-wrap gap-2">
             {plan.alternatives.map((alt: string, idx: number) => (
               <span key={idx} className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/5 text-[10px] font-bold text-white/70 capitalize">
-                {alt.replace("-", " ")}
+                {(alt || "").replace(/-/g, " ")}
               </span>
             ))}
           </div>

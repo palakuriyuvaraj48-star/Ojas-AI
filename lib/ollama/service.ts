@@ -390,6 +390,7 @@ export function getDeterministicFallback(
   prompt?: string
 ): StructuredFitnessRecommendation {
   const config = getOllamaConfig();
+  const lang = context.language || (context.digital_twin?.profile as any)?.language || "en";
   const time = context.available_time_minutes ?? context.digital_twin?.lifestyle?.time_available ?? 30;
   const sleep = context.sleep_hours ?? context.digital_twin?.sleep?.duration_hours ?? 7;
   const recovery = context.recovery_score ?? context.digital_twin?.recovery?.score ?? 70;
@@ -412,41 +413,42 @@ export function getDeterministicFallback(
   let hydrationAdvice = "Consume 500ml water post-workout plus electrolyte balance.";
   let reason = "Generated via Ojas deterministic sports-science engine matching your current recovery baseline.";
 
+  if (lang === "te") {
+    title = "అడాప్టివ్ రోజువారీ సెషన్";
+    workoutName = `${time}-నిమిషాల అడాప్టివ్ ఫంక్షనల్ వర్కౌట్`;
+    recoveryAdvice = "వర్కౌట్ తర్వాత 500ml నీరు త్రాగండి మరియు 10 నిమిషాల లైట్ మొబిలిటీ చేయండి.";
+    nutritionAdvice = "మీ రోజువారీ లక్ష్యాలకు తగిన ప్రోటీన్ (సోయా, గుడ్లు, పప్పు) మరియు సమతుల్య ఆహారం తీసుకోండి.";
+    hydrationAdvice = "తగినంత నీరు మరియు ఎలక్ట్రోలైట్లను తీసుకోండి.";
+    reason = "మీ ప్రస్తుత రికవరీ స్కోరు మరియు సమయ పరిమితికి అనుగుణంగా ఓజస్ ఈ ప్రణాళికను సిద్ధం చేసింది.";
+  } else if (lang === "hi") {
+    title = "अनुकूली दैनिक सत्र";
+    workoutName = `${time}-मिनट का अनुकूली कार्यात्मक वर्कआउट`;
+    recoveryAdvice = "वर्कआउट के बाद 500ml पानी पिएं और 10 मिनट का हल्का मोबिलिटी स्ट्रेच करें।";
+    nutritionAdvice = "अपने दैनिक लक्ष्यों के अनुसार पर्याप्त प्रोटीन (सोया चंक्स, अंडे, दाल) और संतुलित आहार लें।";
+    hydrationAdvice = "पर्याप्त पानी और इलेक्ट्रोलाइट्स का सेवन करें।";
+    reason = "आपके वर्तमान रिकवरी स्कोर और उपलब्ध समय के आधार पर ओजस ने यह योजना तैयार की है।";
+  }
+
   if (state === "RECOVERY_PRIORITY" || state === "LOW_SLEEP") {
-    title = "Restorative Mobility & Decompression";
-    intensity = "Deload / Active Recovery";
-    workoutName = `${Math.min(time, 20)}-Minute Mobility & Joint Decompression`;
-    exercises = [
-      "Cat-Cow & Thoracic Extensions - 2 sets x 10 reps",
-      "90/90 Hip Mobility Flow - 2 sets x 8 reps/side",
-      "Dead Bug Core Stability - 3 sets x 10 reps/side",
-      "Diaphragmatic Box Breathing - 5 minutes",
-    ];
-    recoveryAdvice = "High priority on sleep optimization, parasympathetic breathing, and restorative foam rolling.";
-    reason = "Low recovery score and elevated fatigue detected. Scaled down training volume to prevent central nervous system burnout.";
-  } else if (state === "TIME_LIMITED") {
-    title = "High-Density Express Circuit";
-    intensity = "High Density";
-    workoutName = `${time}-Minute High-Density Bodyweight & DB Circuit`;
-    exercises = [
-      "DB Thrusters / Squat to Press - 3 sets x 10 reps",
-      "DB Bent-Over Alternating Rows - 3 sets x 12 reps",
-      "Bodyweight Walking Lunges - 3 sets x 12 reps/leg",
-      "Mountain Climbers - 3 sets x 30s",
-    ];
-    reason = `Strict ${time}-minute schedule detected. High-density paired sets maximize metabolic stimulus in minimal time.`;
-  } else if (goal.includes("bulk") || goal.includes("muscle")) {
-    title = "Progressive Hypertrophy Split";
-    intensity = "High";
-    workoutName = `${time}-Minute Hypertrophy Split`;
-    exercises = [
-      "DB Romanian Deadlifts - 4 sets x 8-10 reps (1-2 RIR)",
-      "DB Flat Bench Press - 4 sets x 8-10 reps (1-2 RIR)",
-      "Chest Supported Rows - 3 sets x 10-12 reps",
-      "Overhead Tricep Extension - 3 sets x 12-15 reps",
-    ];
-    nutritionAdvice = "Maintain a slight caloric surplus (+250-350 kcal) with 2g/kg protein.";
-    reason = "Optimal readiness detected. Training focuses on progressive overload in hypertrophy rep ranges.";
+    if (lang === "te") {
+      title = "పునరుద్ధరణ మొబిలిటీ & డీకంప్రెషన్";
+      intensity = "యాక్టివ్ రికవరీ";
+      workoutName = `${Math.min(time, 20)}-నిమిషాల మొబిలిటీ ప్రవాహం`;
+      recoveryAdvice = "గాఢ నిద్ర మరియు విశ్రాంతికి ప్రాధాన్యత ఇవ్వండి.";
+      reason = "తక్కువ రికవరీ స్కోర్ నమోదైనందున, నాడీ వ్యవస్థపై ఒత్తిడి తగ్గించేందుకు లైట్ మొబిలిటీ ఎంపిక చేయబడింది.";
+    } else if (lang === "hi") {
+      title = "पुनर्स्थापना मोबिलिटी और डिकंप्रेशन";
+      intensity = "एक्टिव रिकवरी";
+      workoutName = `${Math.min(time, 20)}-मिनट का मोबिलिटी फ्लो`;
+      recoveryAdvice = "गहरी नींद और पर्याप्त आराम को प्राथमिकता दें।";
+      reason = "कम रिकवरी स्कोर और थकान के कारण, तंत्रिका तंत्र पर तनाव कम करने के लिए हल्का मोबिलिटी सत्र चुना गया है।";
+    } else {
+      title = "Restorative Mobility & Decompression";
+      intensity = "Deload / Active Recovery";
+      workoutName = `${Math.min(time, 20)}-Minute Mobility & Joint Decompression`;
+      recoveryAdvice = "High priority on sleep optimization, parasympathetic breathing, and restorative foam rolling.";
+      reason = "Low recovery score and elevated fatigue detected. Scaled down training volume to prevent central nervous system burnout.";
+    }
   }
 
   return {
@@ -596,6 +598,16 @@ export async function generateFitnessResponse(
   const { state, changes } = classifyAdaptiveState(context);
 
   // 3. Assemble predictable prompt structure
+  const lang = context.language || (context.digital_twin?.profile as any)?.language || "en";
+  let langInstruction = "";
+  if (lang === "te") {
+    langInstruction = `\nLANGUAGE INSTRUCTION: The user's chosen primary language is Telugu (తెలుగు). You MUST write all descriptive narrative fields ("title", "workout", "recovery", "nutrition", "hydration", "reason", "alternatives") in natural, fluent Telugu script (తెలుగు) while keeping exercise names recognizable.`;
+  } else if (lang === "hi") {
+    langInstruction = `\nLANGUAGE INSTRUCTION: The user's chosen primary language is Hindi (हिन्दी). You MUST write all descriptive narrative fields ("title", "workout", "recovery", "nutrition", "hydration", "reason", "alternatives") in natural, fluent Hindi script (हिन्दी / देवनागरी) while keeping exercise names recognizable.`;
+  } else {
+    langInstruction = `\nLANGUAGE INSTRUCTION: Respond in natural English.`;
+  }
+
   const contextJson = buildContextBlock(context);
   const fullPrompt = `${OJAS_SYSTEM_PROMPT}
 
@@ -611,6 +623,7 @@ DETERMINISTIC ADAPTATION ANALYSIS:
 
 USER REQUEST:
 ${userPrompt || "Generate today's optimal personalized workout, nutrition, and recovery recommendation."}
+${langInstruction}
 
 ${OJAS_JSON_INSTRUCTION}`;
 

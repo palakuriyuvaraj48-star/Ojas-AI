@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { GlassCard } from "@/components/ui/glass-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,24 +15,7 @@ export function SleepAnalysis() {
   const [form, setForm] = useState({ duration: "7.5", quality: "82", bedtime: "22:30", wakeTime: "06:45" });
   const [saved, setSaved] = useState<SleepLogRecord | null>(null);
 
-  useEffect(() => {
-    const existing = getSleepLogs();
-    if (existing.length) {
-      setSaved(existing[existing.length - 1]);
-      applyFromLog(existing[existing.length - 1]);
-      setLoading(false);
-      return;
-    }
-    fetch("/api/recovery/sleep?action=today")
-      .then((res) => res.json())
-      .then((data) => {
-        setSleepData(data);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  }, []);
-
-  const applyFromLog = (log: SleepLogRecord) => {
+  const applyFromLog = useCallback((log: SleepLogRecord) => {
     const signals: RecoverySignals = {
       sleepDuration: log.duration,
       sleepQuality: log.quality,
@@ -61,7 +44,24 @@ export function SleepAnalysis() {
       weeklyTrend: a.weeklyTrend,
       recommendations: a.recommendations,
     });
-  };
+  }, []);
+
+  useEffect(() => {
+    const existing = getSleepLogs();
+    if (existing.length) {
+      setSaved(existing[existing.length - 1]);
+      applyFromLog(existing[existing.length - 1]);
+      setLoading(false);
+      return;
+    }
+    fetch("/api/recovery/sleep?action=today")
+      .then((res) => res.json())
+      .then((data) => {
+        setSleepData(data);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, [applyFromLog]);
 
   const handleSave = () => {
     const duration = parseFloat(form.duration) || 7.5;

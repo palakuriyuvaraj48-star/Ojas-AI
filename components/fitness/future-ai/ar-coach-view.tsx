@@ -1222,6 +1222,14 @@ function PerformanceReview({
 
 function AIInsights({ sessions }: { sessions: ARCoachSession[] }) {
   const current = sessions[sessions.length - 1];
+  const qualityTrend = useMemo(
+    () =>
+      sessions
+        .slice(-8)
+        .map((s, i) => ({ name: `#${i + 1}`, quality: s.movementQuality })),
+    [sessions]
+  );
+
   if (!current) {
     return (
       <GlassCard className="text-center py-10">
@@ -1233,13 +1241,6 @@ function AIInsights({ sessions }: { sessions: ARCoachSession[] }) {
     );
   }
   const insights = generateInsights(current);
-  const qualityTrend = useMemo(
-    () =>
-      sessions
-        .slice(-8)
-        .map((s, i) => ({ name: `#${i + 1}`, quality: s.movementQuality })),
-    [sessions]
-  );
 
   return (
     <div className="space-y-4">

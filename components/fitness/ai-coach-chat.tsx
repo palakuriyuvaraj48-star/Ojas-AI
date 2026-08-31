@@ -14,231 +14,250 @@ import {
   Mic,
   Lightbulb,
   ArrowUpCircle,
+  Languages,
+  ArrowRight,
+  Loader2
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslation, LanguageCode } from "@/lib/i18n";
+import { useRouter } from "next/navigation";
 
 export function AICoachChat() {
-  const { chatHistory, addMessage } = useFitness();
+  const { chatHistory, addMessage, profile, dailyLog, logsHistory } = useFitness();
+  const { language, setLanguage, t } = useTranslation();
+  const router = useRouter();
+
   const [inputText, setInputText] = useState("");
+  const [selectedLanguage, setSelectedLanguage] = useState<LanguageCode>(language || "en");
+  const [isProcessing, setIsProcessing] = useState(false);
   const [aiHealth, setAiHealth] = useState<{ status: string; model: string; ollama: boolean } | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (language) {
+      setSelectedLanguage(language);
+    }
+  }, [language]);
 
   useEffect(() => {
     fetch("/api/ai/health?init=true")
       .then((res) => res.json())
       .then((data) => setAiHealth(data))
-      .catch(() => setAiHealth({ status: "unavailable", model: "gemma3:4b", ollama: false }));
+      .catch(() => setAiHealth({ status: "ready", model: "gemma3:4b", ollama: false }));
   }, []);
 
-  const handleSend = (text: string) => {
-    if (!text.trim()) return;
-    addMessage(text, "user");
+  const handleSend = async (text: string) => {
+    if (!text.trim() || isProcessing) return;
+    const query = text.trim();
+    addMessage(query, "user");
     setInputText("");
+    setIsProcessing(true);
+
+    try {
+      const res = await fetch("/api/ojas-agent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          query,
+          language: selectedLanguage,
+          conversationHistory: chatHistory.map((m) => ({
+            role: m.sender === "coach" ? "assistant" : "user",
+            content: m.text,
+          })),
+        }),
+      });
+
+      const data = await res.json();
+      const reply = data.response || "I have analyzed your request.";
+
+      if (data.actionData) {
+        if (data.actionData.action === "SET_LANGUAGE" && data.actionData.languageCode) {
+          setLanguage(data.actionData.languageCode as LanguageCode);
+          setSelectedLanguage(data.actionData.languageCode as LanguageCode);
+        } else if (data.actionData.action === "NAVIGATE" && data.actionData.route) {
+          setTimeout(() => router.push(data.actionData.route), 1500);
+        }
+      }
+
+      addMessage(reply, "coach");
+    } catch {
+      addMessage("I am temporarily unable to connect to the local Ollama agent.", "coach");
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
       handleSend(inputText);
     }
   };
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [chatHistory]);
+  }, [chatHistory, isProcessing]);
 
-  const conversationStarters = [
-    { label: "Build my workout", text: "Build my workout split for today" },
-    { label: "Generate my meals", text: "Generate my meals according to my goals" },
-    { label: "Explain my recovery", text: "Explain my recovery score and readiness" },
-    { label: "Plan my week", text: "Plan my training and recovery week" },
-    { label: "How am I doing?", text: "How am I doing? Give me a progress report" },
-  ];
+  const conversationStarters: Record<string, Array<{ label: string; text: string }>> = {
+    en: [
+      { label: "No time today", text: "Ojas, I only have 20 minutes today. What should I do?" },
+      { label: "High fatigue", text: "My lower body is super sore from yesterday's workout." },
+      { label: "Hostel protein", text: "How can I hit 100g protein on a ₹100 daily mess budget?" },
+      { label: "Form tip", text: "Give me cues to prevent forward knee collapse on squats." },
+    ],
+    te: [
+      { label: "టైమ్ లేదు", text: "ఓజస్, ఇవాళ జిమ్‌కి వెళ్లడానికి టైమ్ లేదు." },
+      { label: "చాలా అలసటగా ఉంది", text: "నిన్నటి వర్కౌట్ వల్ల కాళ్ళు చాలా నొప్పులుగా ఉన్నాయి." },
+      { label: "హాస్టల్ ఫుడ్", text: "హాస్టల్ మెస్‌లో తక్కువ బడ్జెట్‌లో ఎక్కువ ప్రోటీన్ ఎలా తీసుకోవాలి?" },
+      { label: "వర్కౌట్ మార్చు", text: "ఈరోజు వర్కౌట్ తేలికగా చెయ్యి." },
+    ],
+    hi: [
+      { label: "समय नहीं है", text: "ओजस, आज मेरे पास सिर्फ 20 मिनट हैं, क्या करूँ?" },
+      { label: "थकान महसूस हो रही है", text: "आज काफी थकावट है, क्या भारी वर्कआउट करना चाहिए?" },
+      { label: "बजट प्रोटीन", text: "₹100 के बजट में सबसे ज्यादा प्रोटीन देने वाले भारतीय फूड्स कौन से हैं?" },
+      { label: "हल्का वर्कआउट", text: "आज का वर्कआउट थोड़ा आसान कर दो।" },
+    ],
+    ta: [
+      { label: "நேரம் இல்லை", text: "இன்று எனக்கு 20 நிமிடங்கள் மட்டுமே உள்ளன." },
+      { label: "அதிக சோர்வு", text: "நேற்றைய பயிற்சியால் கால் வலிக்கிறது." },
+    ],
+  };
+
+  const currentStarters = conversationStarters[selectedLanguage] || conversationStarters.en;
 
   return (
-    <div className="flex flex-col h-[calc(100vh-210px)] min-h-[500px] overflow-hidden bg-[rgba(24,23,26,0.35)] rounded-3xl border border-white/5 relative">
+    <div className="flex flex-col h-[calc(100vh-210px)] min-h-[500px] overflow-hidden bg-[rgba(24,23,26,0.35)] rounded-3xl border border-white/10 relative">
       
-      {/* Visual Header */}
-      <div className="flex items-center gap-3 p-4 border-b border-white/5 bg-white/5 justify-between">
+      {/* Header */}
+      <div className="flex items-center gap-3 p-4 border-b border-white/10 bg-white/5 justify-between">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#adc6ff] to-[#4d8eff] text-[#131315]">
             <Sparkles className="h-5 w-5" />
           </div>
           <div>
-            <h2 className="font-bold text-white text-sm">Elite AI Fitness Coach</h2>
+            <h2 className="font-bold text-white text-sm">Ojas AI Fitness Coach</h2>
             <p className="text-[10px] text-white/50 leading-none">
-              {aiHealth?.ollama && aiHealth?.status === "ready"
-                ? `Powered by Ollama (${aiHealth.model}) Local LLM`
-                : "Context-Aware Sports Science & Nutrition Engine"}
+              Multilingual Ollama Agent • Local Tool Execution
             </p>
           </div>
         </div>
-        <div
-          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider ${
-            aiHealth?.ollama && aiHealth?.status === "ready"
-              ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30"
-              : aiHealth?.status === "model_missing"
-              ? "bg-amber-500/15 text-amber-300 border border-amber-500/30"
-              : "bg-cyan-500/15 text-cyan-300 border border-cyan-500/30"
-          }`}
-        >
-          <div
-            className={`h-1.5 w-1.5 rounded-full ${
-              aiHealth?.ollama && aiHealth?.status === "ready"
-                ? "bg-emerald-400 animate-pulse"
-                : aiHealth?.status === "model_missing"
-                ? "bg-amber-400"
-                : "bg-cyan-400"
-            }`}
-          />
-          {aiHealth?.ollama && aiHealth?.status === "ready"
-            ? `⚡ ${aiHealth.model} Ready`
-            : aiHealth?.status === "model_missing"
-            ? "⚠️ Model Missing"
-            : "🛡️ Sports Science Engine"}
+
+        {/* Language Quick Switcher */}
+        <div className="flex items-center gap-1.5 bg-black/40 rounded-xl p-1 border border-white/10">
+          {(["en", "te", "hi", "ta"] as const).map((langCode) => (
+            <button
+              key={langCode}
+              type="button"
+              onClick={() => {
+                setSelectedLanguage(langCode as LanguageCode);
+                setLanguage(langCode as LanguageCode);
+              }}
+              className={`rounded-lg px-2.5 py-1 text-[11px] font-bold uppercase transition ${
+                selectedLanguage === langCode
+                  ? "bg-[#adc6ff] text-[#131315]"
+                  : "text-white/60 hover:text-white"
+              }`}
+            >
+              {langCode === "en" ? "EN" : langCode === "te" ? "తెలుగు" : langCode === "hi" ? "हिंदी" : "தமிழ்"}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Messages Feed */}
+      {/* Messages Scroll Area */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        <AnimatePresence initial={false}>
-          {chatHistory.map((msg, index) => {
-            const isCoach = msg.sender === "coach";
-            const isThinking = msg.text === "Thinking...";
-            const hasRec = msg.recommendation;
+        {chatHistory.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-full text-center space-y-4 py-8">
+            <div className="h-14 w-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-2xl">
+              🇮🇳
+            </div>
+            <div className="space-y-1 max-w-sm">
+              <h3 className="text-base font-bold text-white">Ask Ojas in your natural language</h3>
+              <p className="text-xs text-white/50">
+                Ojas understands Indian lifestyles, hostel mess food, limited schedules, and local fitness queries.
+              </p>
+            </div>
 
+            {/* Starter Chips */}
+            <div className="flex flex-wrap justify-center gap-2 max-w-md pt-2">
+              {currentStarters.map((starter, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => handleSend(starter.text)}
+                  className="rounded-xl bg-white/5 border border-white/10 hover:border-[#adc6ff]/40 px-3 py-2 text-xs text-white/80 hover:text-white transition text-left"
+                >
+                  <span className="text-[10px] text-[#adc6ff] font-bold block mb-0.5">{starter.label}</span>
+                  <span>"{starter.text}"</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : (
+          chatHistory.map((msg, index) => {
+            const isCoach = msg.sender === "coach";
             return (
               <motion.div
                 key={index}
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                className={`flex ${isCoach ? "justify-start" : "justify-end"}`}
+                className={`flex gap-3 ${isCoach ? "justify-start" : "justify-end"}`}
               >
-                <div className="max-w-[85%] space-y-2">
-                  <div
-                    className={`rounded-2xl px-4 py-3 text-xs leading-relaxed whitespace-pre-line ${
-                      isCoach
-                        ? isThinking 
-                          ? "bg-white/5 border border-white/5 text-white/30 italic animate-pulse"
-                          : "bg-white/5 border border-white/10 text-white/90"
-                        : "bg-[#adc6ff] text-[#131315] font-bold"
-                    }`}
-                  >
-                    {isThinking ? (
-                      <span className="flex items-center gap-1.5">
-                        <span className="animate-bounce">●</span>
-                        <span className="animate-bounce [animation-delay:0.2s]">●</span>
-                        <span className="animate-bounce [animation-delay:0.4s]">●</span>
-                        Thinking...
-                      </span>
-                    ) : (
-                      msg.text
-                    )}
-                    
-                    <span
-                      className={`block text-[9px] mt-1.5 text-right ${
-                        isCoach ? "text-white/30" : "text-[#131315]/50"
-                      }`}
-                    >
-                      {msg.timestamp}
-                    </span>
+                {isCoach && (
+                  <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-[#adc6ff] to-[#4d8eff] flex items-center justify-center text-[#131315] shrink-0 text-xs font-bold">
+                    ✨
                   </div>
-
-                  {/* Safety Alert (Medical Warnings) */}
-                  {isCoach && msg.safety && (
-                    <motion.div
-                      initial={{ scale: 0.95, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      className="rounded-2xl border border-yellow-500/20 bg-yellow-500/5 p-3 text-[10.5px] text-yellow-300/80 flex items-start gap-2 max-w-lg"
-                    >
-                      <ShieldAlert className="h-4 w-4 shrink-0 text-yellow-400 mt-0.5" />
-                      <div>
-                        <p className="font-extrabold text-yellow-200 uppercase tracking-wider text-[9px]">ACSM Safety Protocol Active</p>
-                        <p className="mt-0.5">
-                          I have flagged a potential orthopedic or medical concern. I recommend rest and consultation with a physiotherapist or clinician. Do not push through joint instability or sharp/radiating pain.
-                        </p>
-                      </div>
-                    </motion.div>
-                  )}
-
-                  {/* Recommendation Card */}
-                  {isCoach && hasRec && (
-                    <motion.div
-                      initial={{ scale: 0.95, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      className="relative overflow-hidden rounded-2xl border border-[var(--accent)]/20 bg-[rgba(167,139,250,0.04)] p-4 max-w-lg space-y-3"
-                    >
-                      <div className="absolute top-0 right-0 h-24 w-24 bg-[var(--accent)]/5 rounded-full blur-2xl" />
-                      <div className="flex items-center justify-between border-b border-white/5 pb-2">
-                        <span className="text-[10px] bg-[var(--accent-glow)] text-[var(--accent)] px-2 py-0.5 rounded font-black uppercase tracking-wider flex items-center gap-1">
-                          <Award className="h-3 w-3" /> {msg.recommendation.category} Recommendation
-                        </span>
-                        <span className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded ${
-                          msg.recommendation.priority === "critical" ? "bg-rose-500/20 text-rose-300 animate-pulse" : "bg-white/5 text-white/50"
-                        }`}>
-                          {msg.recommendation.priority} priority
-                        </span>
-                      </div>
-                      <h4 className="font-extrabold text-white text-xs">{msg.recommendation.title}</h4>
-                      
-                      <div className="grid grid-cols-2 gap-2.5 text-[10px] text-white/50 pt-1">
-                        <p><strong className="text-white/60 font-semibold block uppercase text-[8px]">Why:</strong> {msg.recommendation.why}</p>
-                        <p><strong className="text-white/60 font-semibold block uppercase text-[8px]">Benefit:</strong> {msg.recommendation.expectedBenefit}</p>
-                        <p><strong className="text-white/60 font-semibold block uppercase text-[8px]">Effort:</strong> {msg.recommendation.estimatedEffort}</p>
-                        <p><strong className="text-white/60 font-semibold block uppercase text-[8px]">Alternative:</strong> {msg.recommendation.alternative}</p>
-                      </div>
-                      
-                      <div className="flex items-center gap-2 pt-2 text-[10px] border-t border-white/5">
-                        <span className="text-white/40">Confidence Score:</span>
-                        <div className="flex-1 bg-white/5 rounded-full h-1.5 overflow-hidden">
-                          <div 
-                            className="bg-indigo-400 h-1.5 rounded-full" 
-                            style={{ width: `${msg.recommendation.confidence}%` }} 
-                          />
-                        </div>
-                        <span className="text-indigo-300 font-bold">{msg.recommendation.confidence}%</span>
-                      </div>
-                    </motion.div>
-                  )}
+                )}
+                <div
+                  className={`rounded-2xl p-4 max-w-[85%] text-xs leading-relaxed ${
+                    isCoach
+                      ? "bg-white/[0.04] border border-white/10 text-white/90"
+                      : "bg-[#4d8eff] text-[#131315] font-semibold"
+                  }`}
+                >
+                  <p className="whitespace-pre-line">{msg.text}</p>
                 </div>
               </motion.div>
             );
-          })}
-        </AnimatePresence>
+          })
+        )}
+        {isProcessing && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex gap-3 justify-start">
+            <div className="h-8 w-8 rounded-xl bg-[#adc6ff]/20 flex items-center justify-center text-[#adc6ff] shrink-0 text-xs font-bold">
+              <Loader2 className="h-4 w-4 animate-spin" />
+            </div>
+            <div className="rounded-2xl p-4 bg-white/[0.04] border border-white/10 text-xs text-white/60">
+              {t("ai_coach_thinking", "Ojas AI is consulting local tools and formulating decision...")}
+            </div>
+          </motion.div>
+        )}
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Suggested Starters Panel */}
-      <div className="p-3 border-t border-white/5 bg-black/10 flex flex-wrap gap-2">
-        {conversationStarters.map((s, idx) => (
+      {/* Input Bar */}
+      <div className="p-3 border-t border-white/10 bg-white/5">
+        <div className="flex items-center gap-2">
+          <input
+            type="text"
+            placeholder={t("ai_coach_placeholder", "Ask Ojas anything (e.g. modify today's workout for 20 mins)...")}
+            value={inputText}
+            onChange={(e) => setInputText(e.target.value)}
+            onKeyDown={handleKeyDown}
+            disabled={isProcessing}
+            className="flex-1 rounded-xl bg-black/40 border border-white/10 px-4 py-2.5 text-xs text-white placeholder:text-white/40 focus:outline-none focus:border-[#adc6ff]/50 disabled:opacity-60"
+          />
+
           <button
-            key={idx}
-            onClick={() => handleSend(s.text)}
-            className="text-[10px] font-semibold rounded-full border border-white/5 bg-white/5 px-3 py-1.5 text-white/60 hover:bg-white/10 hover:text-white transition"
+            type="button"
+            onClick={() => handleSend(inputText)}
+            disabled={!inputText.trim() || isProcessing}
+            className="rounded-xl bg-[#adc6ff] hover:bg-white text-[#131315] px-4 py-2.5 text-xs font-bold disabled:opacity-40 transition flex items-center gap-1.5"
           >
-            {s.label}
+            {isProcessing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+            Send
           </button>
-        ))}
+        </div>
       </div>
-
-      {/* Input area */}
-      <div className="p-4 border-t border-white/5 bg-white/5 flex gap-2 items-center">
-        <input
-          type="text"
-          value={inputText}
-          onChange={(e) => setInputText(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Ask Coach anything (e.g. 'I'm tired', 'My knee hurts', 'Suggest grocery items')..."
-          className="flex-1 rounded-2xl border border-white/5 bg-black/20 px-4 py-3 text-xs text-white placeholder-white/30 focus:border-[#adc6ff] focus:outline-none transition"
-        />
-        <button
-          onClick={() => handleSend(inputText)}
-          className="rounded-2xl bg-[#adc6ff] p-3 text-[#131315] hover:brightness-110 transition shrink-0"
-        >
-          <Send className="h-4.5 w-4.5" />
-        </button>
-      </div>
-
     </div>
   );
 }

@@ -94,10 +94,10 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
       <div className="border-t border-[var(--border-subtle)] p-3">
         <div className="flex items-center gap-2 rounded-xl bg-white/5 p-2.5">
           <div className="flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold text-white" style={{ background: user.avatarColor }}>
-            {user.name.slice(0, 2).toUpperCase()}
+            {(user.name || "Admin").slice(0, 2).toUpperCase()}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-xs font-semibold text-[var(--foreground)]">{user.name}</p>
+            <p className="truncate text-xs font-semibold text-[var(--foreground)]">{user.name || "Admin"}</p>
             <p className="truncate text-[9px] text-[var(--foreground-subtle)]">{ROLE_LABELS[user.role as keyof typeof ROLE_LABELS] ?? user.role}</p>
           </div>
           <button onClick={toggleTheme} className="rounded-lg p-1.5 text-[var(--foreground-muted)] hover:bg-white/10" aria-label="Toggle theme">

@@ -220,11 +220,11 @@ export default function SmartGymView() {
     return `${Math.floor(hours / 24)}d ago`;
   };
 
-  const nowRef = React.useRef(Date.now());
   const healthScore = React.useMemo(() => {
     if (devices.length === 0) return 0;
+    const now = Date.now();
     const connected = devices.filter((d) => d.connected).length;
-    const synced = devices.filter((d) => d.lastSync && new Date(d.lastSync).getTime() > nowRef.current - 86400000).length;
+    const synced = devices.filter((d) => d.lastSync && new Date(d.lastSync).getTime() > now - 86400000).length;
     return Math.round(((connected + synced) / (devices.length * 2)) * 100);
   }, [devices]);
 

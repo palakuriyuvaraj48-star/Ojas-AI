@@ -210,7 +210,7 @@ export function MovementGuide3D({ exercise, movementPhase = "ready", className }
           <div
             key={st.label}
             className={`p-1.5 rounded-lg border transition ${
-              activePhaseLabel.includes(st.label.split(". ")[1].toUpperCase())
+              activePhaseLabel.includes((st.label.split(". ")[1] || st.label).toUpperCase())
                 ? "border-cyan-400 bg-cyan-400/15 text-cyan-200 font-bold"
                 : "border-white/5 bg-white/5 text-white/50"
             }`}
