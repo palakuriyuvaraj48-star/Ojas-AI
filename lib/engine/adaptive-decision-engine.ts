@@ -42,8 +42,8 @@ export class AdaptiveDecisionEngine {
       return this.recommendRecovery(state);
     }
 
-    // STEP 2: Check for Exam Period simulation or extreme time constraint (<= 15m)
-    if (state.isExamPeriod || state.availableTime <= 15) {
+    // STEP 2: Check for extreme time constraint (<= 15m) or Exam Period
+    if (state.availableTime <= 15 || state.isExamPeriod) {
       return this.recommendMinimalTraining(state);
     }
 
@@ -57,8 +57,8 @@ export class AdaptiveDecisionEngine {
       return this.recommendModerateSession(state);
     }
 
-    // STEP 5: Check optimal conditions for Progressive Overload (Recovery >= 78 & Energetic)
-    if (state.recovery >= 78 && state.energyLevel === "energetic") {
+    // STEP 5: Check optimal conditions for Progressive Overload (Recovery > 80 & Energetic)
+    if (state.recovery > 80 && state.energyLevel === "energetic") {
       return this.recommendProgressiveOverload(state);
     }
 
@@ -235,3 +235,6 @@ export class AdaptiveDecisionEngine {
 }
 
 export const adaptiveDecisionEngine = new AdaptiveDecisionEngine();
+
+/** Pure, shared entry point used by dashboard and Digital Twin consumers. */
+export const getRecommendation = (state: DashboardState): WorkoutRecommendation => adaptiveDecisionEngine.decide(state);

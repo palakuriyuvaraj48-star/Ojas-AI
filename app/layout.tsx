@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/providers/theme-provider";
 import { AuthProvider } from "@/providers/auth-provider";
 import { ToastProvider } from "@/providers/toast-provider";
 import { I18nProvider } from "@/lib/i18n";
+import { AdaptiveStateProvider } from "@/components/providers/adaptive-state-provider";
 
 export const metadata: Metadata = {
   title: "Ojas AI | India-First AI Fitness Operating System",
@@ -25,11 +26,13 @@ export default function RootLayout({
           <AuthProvider>
             <ToastProvider>
               <FitnessProvider>
-                <OjasProvider>
-                  <I18nProvider>
-                    <MusicProvider>{children}</MusicProvider>
-                  </I18nProvider>
-                </OjasProvider>
+                <AdaptiveStateProvider>
+                  <OjasProvider>
+                    <I18nProvider>
+                      <MusicProvider>{children}</MusicProvider>
+                    </I18nProvider>
+                  </OjasProvider>
+                </AdaptiveStateProvider>
               </FitnessProvider>
             </ToastProvider>
           </AuthProvider>

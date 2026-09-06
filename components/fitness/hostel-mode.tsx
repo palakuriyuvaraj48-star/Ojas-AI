@@ -134,6 +134,21 @@ export function HostelMode() {
         </div>
       )}
 
+      <GlassCard className="p-5 border-amber-400/30 bg-gradient-to-r from-amber-500/10 to-transparent space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div><p className="text-[10px] font-bold uppercase tracking-wider text-amber-300">Worked example · illustrative</p><h3 className="text-lg font-bold text-white">₹100/day Hostel Muscle-Building Plan</h3></div>
+          <span className="rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-300">₹100 · 1,425 kcal · 69g protein</span>
+        </div>
+        <div className="grid gap-3 md:grid-cols-3 text-xs">
+          {[
+            { meal: "Breakfast · 7:00 AM", cost: "₹15", protein: "16g protein", items: ["2 Boiled Eggs — ₹10, 12g, 140 kcal", "1 Roti — ₹5, 4g, 80 kcal"] },
+            { meal: "Lunch · 1:00 PM", cost: "₹35", protein: "15g protein", items: ["Dal, 1 bowl — ₹15, 8g, 150 kcal", "Rice, 1.5 cups — ₹15, 6g, 300 kcal", "Salad — ₹5, 1g, 20 kcal"] },
+            { meal: "Dinner · 8:00 PM", cost: "₹35", protein: "29g protein", items: ["Chicken curry, 150g — ₹25, 25g, 250 kcal", "Rice, 1 cup — ₹10, 4g, 200 kcal"] },
+          ].map((meal) => <div key={meal.meal} className="rounded-xl border border-white/10 bg-black/20 p-3 space-y-2"><div className="flex justify-between font-bold text-white"><span>{meal.meal}</span><span className="text-amber-300">{meal.cost}</span></div><p className="font-semibold text-emerald-300">{meal.protein}</p>{meal.items.map(item => <p key={item} className="text-white/60">{item}</p>)}</div>)}
+        </div>
+        <p className="text-[11px] text-white/65">Totals: 162g carbs · 27g fats. Prioritizes protein for muscle building, uses standard hostel-mess staples, and stays within a student-friendly daily budget.</p>
+      </GlassCard>
+
       {/* Main Grid: Mess Menu on Left, AI Ranked Choices on Right */}
       <div className="grid lg:grid-cols-[1.1fr_1fr] gap-6">
         {/* Left: Interactive Today's Mess Menu */}

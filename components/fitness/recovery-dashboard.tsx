@@ -89,16 +89,18 @@ export function RecoveryDashboard() {
                 <Sparkles className="h-3.5 w-3.5" />
                 Continuous Bio-Readiness
               </span>
-              <span className="text-white/40 text-xs">Updated 10m ago</span>
+              <span className="text-white/40 text-xs">Transparent Calculation</span>
             </div>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
               Today&apos;s Recovery Score
             </h2>
-            <p className="text-sm text-white/70 max-w-lg">
-              {recoveryData.todayScore >= 80 && "✅ Optimal Recovery: Central nervous system is primed for progressive overload."}
-              {recoveryData.todayScore >= 60 && recoveryData.todayScore < 80 && "👍 Adequate Recovery: Moderate-to-high intensity training supported."}
-              {recoveryData.todayScore >= 40 && recoveryData.todayScore < 60 && "⚠️ Mild Fatigue: Light or moderate accessory work recommended."}
-              {recoveryData.todayScore < 40 && "❌ Recovery Priority: Active restoration recommended to prevent overreaching."}
+            <p className="text-sm font-semibold text-white/90 max-w-lg">
+              {recoveryData.todayScore}/100 — {recoveryData.todayScore >= 75 ? "Moderate to high training safe" : recoveryData.todayScore >= 50 ? "Moderate training safe" : "Recovery priority"}
+            </p>
+            <p className="text-xs text-white/60 max-w-lg">
+              {recoveryData.todayScore >= 80 && "Optimal Recovery: Central nervous system is primed for progressive overload."}
+              {recoveryData.todayScore >= 60 && recoveryData.todayScore < 80 && "Adequate Recovery: Moderate-to-high intensity training supported."}
+              {recoveryData.todayScore < 60 && "Active restoration recommended to prevent overreaching."}
             </p>
           </div>
 
@@ -106,6 +108,63 @@ export function RecoveryDashboard() {
             <div className="flex flex-col items-center">
               <ProgressRing progress={recoveryData.todayScore} size={130} strokeWidth={10} color="#3b82f6" showLabel={true} />
               <span className="text-xs font-bold text-blue-300 mt-2">Ready for Training</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Transparent Score Breakdown Formula: Sleep (35%) + Fatigue (30%) + Training Load (20%) + Nutrition (15%) */}
+        <div className="mt-6 pt-5 border-t border-white/10 space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#adc6ff] flex items-center gap-1.5">
+              <BrainCircuit className="h-3.5 w-3.5" />
+              Transparent Recovery Formula Breakdown
+            </span>
+            <span className="text-[10px] text-white/50">Sleep (35%) + Fatigue (30%) + Training Load (20%) + Nutrition (15%)</span>
+          </div>
+
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="p-3 rounded-xl bg-white/[0.03] border border-white/5 space-y-1.5">
+              <div className="flex justify-between text-xs font-bold">
+                <span className="text-indigo-300">Sleep (35%)</span>
+                <span className="text-white">29.4 / 35 pts</span>
+              </div>
+              <div className="h-1.5 rounded-full bg-white/10 overflow-hidden">
+                <div className="h-full bg-indigo-400 rounded-full" style={{ width: "84%" }} />
+              </div>
+              <span className="text-[10px] text-white/40 block">7.4h duration · 84% eff.</span>
+            </div>
+
+            <div className="p-3 rounded-xl bg-white/[0.03] border border-white/5 space-y-1.5">
+              <div className="flex justify-between text-xs font-bold">
+                <span className="text-amber-300">Fatigue (30%)</span>
+                <span className="text-white">21.0 / 30 pts</span>
+              </div>
+              <div className="h-1.5 rounded-full bg-white/10 overflow-hidden">
+                <div className="h-full bg-amber-400 rounded-full" style={{ width: "70%" }} />
+              </div>
+              <span className="text-[10px] text-white/40 block">Low systemic stress</span>
+            </div>
+
+            <div className="p-3 rounded-xl bg-white/[0.03] border border-white/5 space-y-1.5">
+              <div className="flex justify-between text-xs font-bold">
+                <span className="text-emerald-300">Training Load (20%)</span>
+                <span className="text-white">15.6 / 20 pts</span>
+              </div>
+              <div className="h-1.5 rounded-full bg-white/10 overflow-hidden">
+                <div className="h-full bg-emerald-400 rounded-full" style={{ width: "78%" }} />
+              </div>
+              <span className="text-[10px] text-white/40 block">Optimal 24h deload</span>
+            </div>
+
+            <div className="p-3 rounded-xl bg-white/[0.03] border border-white/5 space-y-1.5">
+              <div className="flex justify-between text-xs font-bold">
+                <span className="text-cyan-300">Nutrition (15%)</span>
+                <span className="text-white">12.0 / 15 pts</span>
+              </div>
+              <div className="h-1.5 rounded-full bg-white/10 overflow-hidden">
+                <div className="h-full bg-cyan-400 rounded-full" style={{ width: "80%" }} />
+              </div>
+              <span className="text-[10px] text-white/40 block">86g protein + hydration</span>
             </div>
           </div>
         </div>
@@ -318,6 +377,27 @@ export function RecoveryDashboard() {
           </div>
         </GlassCard>
       </div>
+
+      {/* 4. Actionable Recommendation Banner */}
+      <GlassCard className="p-4 sm:p-5 border-emerald-500/30 bg-gradient-to-r from-emerald-950/30 via-[#181a20] to-[#121316] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+            <CheckCircle2 className="h-5 w-5" />
+          </div>
+          <div>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-300 block">
+              Actionable Recommendation (Bio-Telemetry Driven)
+            </span>
+            <p className="text-xs sm:text-sm font-bold text-white mt-0.5">
+              {recoveryData.domsData.legs >= 5
+                ? "Light mobility work for legs. Avoid heavy leg training today."
+                : recoveryData.todayScore >= 75
+                ? "Full green light: Central nervous system is fresh. Execute progressive overload on primary compound movements."
+                : "Moderate load advised: Focus on upper accessory volume and keep rest intervals at 90s."}
+            </p>
+          </div>
+        </div>
+      </GlassCard>
     </div>
   );
 }

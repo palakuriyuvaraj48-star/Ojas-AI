@@ -28,7 +28,7 @@ import {
   Play
 } from "lucide-react";
 import Link from "next/link";
-import { useDashboardState } from "@/hooks/use-dashboard-state";
+import { useAdaptiveState } from "@/components/providers/adaptive-state-provider";
 import { DecisionLogicDiagram } from "@/components/fitness/decision-logic-diagram";
 import { OjasScoreSummary } from "@/components/fitness/ojas-score-summary";
 import { SportJourneyCard } from "@/components/fitness/sport-journey-card";
@@ -57,10 +57,7 @@ export function DashboardView() {
     simulateExamPeriod,
     simulateOptimalCondition,
     simulateHostelSprint,
-  } = useDashboardState({
-    availableTime: profile?.availableWorkoutTime || 35,
-    hostelMode: profile?.isHostelMode ?? (profile?.lifestyleRole === "college-student"),
-  });
+  } = useAdaptiveState();
 
   const [showReasoning, setShowReasoning] = useState(false);
   const [foodInput, setFoodInput] = useState({ name: "", cal: "", prot: "", carb: "", fat: "" });

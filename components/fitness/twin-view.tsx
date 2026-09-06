@@ -43,11 +43,13 @@ import { getSessions } from "@/lib/vision/session-storage";
 import { useTranslation } from "@/lib/i18n";
 import { TranslationDictionary } from "@/lib/i18n/types";
 import { SPORT_REGISTRY } from "@/lib/sports";
+import { useAdaptiveState } from "@/components/providers/adaptive-state-provider";
 
 type TwinTab = "twin" | "what-changed" | "timeline" | "simulator" | "forecast";
 
 export function TwinView() {
   const { profile, metrics, logsHistory } = useFitness();
+  const { state: dashboardState, recommendation } = useAdaptiveState();
   const { t } = useTranslation();
   const [tab, setTab] = useState<TwinTab>("twin");
   const [selectedMuscle, setSelectedMuscle] = useState<string>("quads");
@@ -385,7 +387,7 @@ export function TwinView() {
                       { label: "Strength Trend", value: "↑ Increasing", col: "text-emerald-400" },
                       { label: "Average Form Score", value: `${avgFormScore} / 100`, col: "text-cyan-400" },
                       { label: "Workout Consistency", value: "84 / 100", col: "text-emerald-400" },
-                      { label: "Recovery Efficiency", value: "82 / 100", col: "text-cyan-400" },
+                      { label: "Recovery Efficiency", value: `${dashboardState.recovery} / 100`, col: "text-cyan-400" },
                       { label: "Total Vision Reps", value: `${totalVisionReps || 42} reps`, col: "text-purple-300" },
                     ].map((score) => (
                       <GlassCard key={score.label} className="p-4 bg-[rgba(24,23,26,0.35)] border-white/5 text-left">
@@ -396,6 +398,16 @@ export function TwinView() {
                       </GlassCard>
                     ))}
                   </div>
+
+                  <motion.div
+                    key={`${dashboardState.availableTime}-${dashboardState.sleepDuration}-${dashboardState.recovery}`}
+                    initial={{ opacity: 0.35, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }}
+                    className="grid grid-cols-3 gap-3 rounded-2xl border border-cyan-400/30 bg-cyan-500/5 p-4"
+                  >
+                    <div><p className="text-[10px] font-bold uppercase text-white/45">Lifestyle</p><p className="mt-1 text-sm font-black text-cyan-300">{dashboardState.availableTime} min</p><p className="text-[10px] text-white/50">available time</p></div>
+                    <div><p className="text-[10px] font-bold uppercase text-white/45">Sleep</p><p className="mt-1 text-sm font-black text-cyan-300">{dashboardState.sleepDuration.toFixed(1)} h</p><p className="text-[10px] text-white/50">last night</p></div>
+                    <div><p className="text-[10px] font-bold uppercase text-white/45">Recovery</p><p className="mt-1 text-sm font-black text-cyan-300">{dashboardState.recovery}/100</p><p className="text-[10px] text-white/50">{recommendation.intensity} plan</p></div>
+                  </motion.div>
 
                   {/* Closed-Loop Action to Adaptive Engine */}
                   <GlassCard className="p-5 border-cyan-400/30 bg-gradient-to-r from-cyan-950/30 via-slate-900/60 to-cyan-950/20 space-y-3">
@@ -490,18 +502,50 @@ export function TwinView() {
                       <div className="p-3.5 rounded-2xl bg-white/5 border border-white/5">
                         <span className="text-[10px] text-white/40 uppercase font-semibold">Available Workout Time</span>
                         <div className="flex items-center gap-2 mt-1">
-                          <span className="text-white/50 line-through">60 min</span>
-                          <span className="text-amber-300 font-bold">→ 20 min</span>
-                          <ArrowDownRight className="h-4 w-4 text-amber-300" />
+                          <span className="text-white/50 line-through">45 min</span>
+                          <span className="text-amber-300 font-bold">→ {dashboardState.availableTime} min</span>
+                          <motion.span
+                            key={dashboardState.availableTime}
+                            initial={{ scale: 1.4, color: "#fef08a" }}
+                            animate={{ scale: 1, color: "#fcd34d" }}
+                            transition={{ duration: 0.4 }}
+                          >
+                            <ArrowDownRight className="h-4 w-4" />
+                          </motion.span>
                         </div>
                       </div>
 
                       <div className="p-3.5 rounded-2xl bg-white/5 border border-white/5">
                         <span className="text-[10px] text-white/40 uppercase font-semibold">Sleep Duration</span>
                         <div className="flex items-center gap-2 mt-1">
-                          <span className="text-white/50 line-through">7.4 hrs</span>
-                          <span className="text-amber-300 font-bold">→ 5.5 hrs</span>
-                          <ArrowDownRight className="h-4 w-4 text-amber-300" />
+                          <span className="text-white/50 line-through">7.5 hrs</span>
+                          <span className="text-cyan-300 font-bold">→ {dashboardState.sleepDuration.toFixed(1)} hrs</span>
+                          <motion.span
+                            key={dashboardState.sleepDuration}
+                            initial={{ scale: 1.4, color: "#a5f3fc" }}
+                            animate={{ scale: 1, color: "#67e8f9" }}
+                            transition={{ duration: 0.4 }}
+                          >
+                            <ArrowDownRight className="h-4 w-4" />
+                          </motion.span>
+                        </div>
+                      </div>
+
+                      <div className="p-3.5 rounded-2xl bg-white/5 border border-white/5">
+                        <span className="text-[10px] text-white/40 uppercase font-semibold">Recovery Score</span>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-white/50 line-through">85/100</span>
+                          <span className={`font-bold ${dashboardState.recovery >= 75 ? "text-emerald-400" : dashboardState.recovery >= 50 ? "text-amber-300" : "text-rose-400"}`}>
+                            → {dashboardState.recovery}/100
+                          </span>
+                          <motion.span
+                            key={dashboardState.recovery}
+                            initial={{ scale: 1.4 }}
+                            animate={{ scale: 1 }}
+                            transition={{ duration: 0.4 }}
+                          >
+                            <ArrowUpRight className="h-4 w-4 text-cyan-400" />
+                          </motion.span>
                         </div>
                       </div>
                     </div>

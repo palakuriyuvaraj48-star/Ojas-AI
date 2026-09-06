@@ -1681,7 +1681,7 @@ export function LandingPage() {
                 <p>English, हिंदी, తెలుగు, and more.</p>
               </div>
               <div className="mt-4 p-3 bg-purple-400/10 border border-purple-400/30 rounded-xl">
-                <p className="text-xs text-purple-200 font-bold">13+ Languages</p>
+                <p className="text-xs text-purple-200 font-bold">3 Languages (more coming)</p>
               </div>
             </div>
           </div>

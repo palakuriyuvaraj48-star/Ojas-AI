@@ -139,6 +139,12 @@ export function ProgressView() {
     { muscle: "Back", sets: 12, reps: 96 },
     { muscle: "Shoulders", sets: 10, reps: 80 },
   ];
+  const fourWeekTrends = [
+    { week: "W1", volume: 30, form: 74, adherence: 62, recovery: 72 },
+    { week: "W2", volume: 35, form: 82, adherence: 71, recovery: 76 },
+    { week: "W3", volume: 38, form: 85, adherence: 84, recovery: 74 },
+    { week: "W4", volume: 42, form: 88, adherence: 92, recovery: 79 },
+  ];
 
   // Nutrition trends
   const nutritionData = [
@@ -189,6 +195,85 @@ export function ProgressView() {
         >
           <Plus className="h-4 w-4" /> Submit Weekly Check-In
         </button>
+      </GlassCard>
+
+      <GlassCard className="p-5 border-[#adc6ff]/20 bg-[rgba(24,23,26,0.35)]" glow>
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-[#adc6ff] block">
+              Illustrative 4-Week Usage Data · Continuous Learning Proof
+            </span>
+            <h3 className="text-base sm:text-lg font-bold text-white mt-0.5">
+              4-Week Adaptation &amp; Progression Outcomes
+            </h3>
+          </div>
+          <span className="rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-bold px-3 py-1">
+            System Adapts &amp; Learns
+          </span>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {[
+            {
+              title: "Training Volume",
+              key: "volume",
+              color: "#adc6ff",
+              summary: "30 → 42 weekly sets",
+              insight: "Training volume rose steadily (+40%) as work capacity expanded.",
+              unit: "sets",
+            },
+            {
+              title: "Form Score",
+              key: "form",
+              color: "#34d399",
+              summary: "74 → 88 / 100",
+              insight: "Form score improved 19% over 4 weeks — squat depth consistency is the main driver.",
+              unit: "/100",
+            },
+            {
+              title: "Consistency / Adherence",
+              key: "adherence",
+              color: "#fbbf24",
+              summary: "62% → 92%",
+              insight: "Consistency jumped to 92% after introducing 15-25m adaptive time splits.",
+              unit: "%",
+            },
+            {
+              title: "Recovery Score",
+              key: "recovery",
+              color: "#a78bfa",
+              summary: "72 → 79 / 100",
+              insight: "Recovery fluctuated but remained stable and resilient through auto-regulation.",
+              unit: "/100",
+            },
+          ].map((item) => (
+            <div key={item.key} className="rounded-2xl border border-white/10 bg-black/30 p-4 flex flex-col justify-between space-y-3">
+              <div>
+                <span className="text-xs font-bold text-white/80">{item.title}</span>
+                <p className="text-base font-black mt-0.5" style={{ color: item.color }}>{item.summary}</p>
+              </div>
+              <div className="h-24 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={fourWeekTrends} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+                    <XAxis dataKey="week" stroke="rgba(255,255,255,0.4)" fontSize={10} tickLine={false} />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "#181a20",
+                        border: "1px solid rgba(255,255,255,0.15)",
+                        borderRadius: "8px",
+                        fontSize: "11px",
+                        color: "#fff",
+                      }}
+                    />
+                    <Line type="monotone" dataKey={item.key} stroke={item.color} strokeWidth={2.5} dot={{ r: 3, fill: item.color }} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+              <p className="text-[11px] leading-relaxed text-white/60 border-t border-white/5 pt-2">
+                {item.insight}
+              </p>
+            </div>
+          ))}
+        </div>
       </GlassCard>
 
       {/* Tabs Navigation */}

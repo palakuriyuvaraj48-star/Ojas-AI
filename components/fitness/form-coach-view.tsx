@@ -81,6 +81,40 @@ export function FormCoachView() {
         </div>
       </GlassCard>
 
+      {/* Exercise Quick Selector for instant switching */}
+      <GlassCard className="p-3 bg-[#131418] border-white/10 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-xs font-bold text-white/50 flex items-center gap-1.5 mr-1">
+            <Dumbbell className="h-3.5 w-3.5 text-[#adc6ff]" />
+            Active Exercise:
+          </span>
+          {[
+            { id: "squat", name: "Barbell Squat", tag: "Lower Body" },
+            { id: "push-up", name: "Push-up", tag: "Bodyweight" },
+            { id: "deadlift", name: "Deadlift", tag: "Hinge Strength" },
+            { id: "bench-press", name: "Bench Press", tag: "Upper Press" },
+            { id: "pull-up", name: "Pull-up", tag: "Upper Pull" },
+          ].map((ex) => (
+            <button
+              key={ex.id}
+              onClick={() => coach.setExerciseId(ex.id)}
+              className={`rounded-xl px-3.5 py-1.5 text-xs font-bold transition flex items-center gap-1.5 ${
+                coach.exercise.id === ex.id
+                  ? "bg-[#adc6ff] text-[#131315] shadow-md shadow-blue-500/20 scale-105"
+                  : "bg-white/5 text-white/60 hover:text-white"
+              }`}
+            >
+              <span>{ex.name}</span>
+              <span className={`text-[9px] px-1.5 py-0.2 rounded-md ${
+                coach.exercise.id === ex.id ? "bg-[#131315]/20 text-[#131315]" : "bg-white/10 text-white/40"
+              }`}>
+                {ex.tag}
+              </span>
+            </button>
+          ))}
+        </div>
+      </GlassCard>
+
       {/* Tab bar */}
       <div className="flex gap-1 overflow-x-auto rounded-2xl border border-white/10 bg-black/20 p-1">
         {tabs.map((tItem) => {

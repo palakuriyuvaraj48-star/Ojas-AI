@@ -21,15 +21,15 @@ export function OjasLiteToggle() {
   return (
     <button
       onClick={toggleLiteMode}
-      className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-bold border transition ${
+      className={`group relative flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-bold border transition ${
         isLiteMode
-          ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/40"
+          ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/40 shadow-sm"
           : "bg-white/5 text-white/60 border-white/10 hover:text-white"
       }`}
-      title="Ojas Lite: India-Constrained Low Data Mode"
+      title="Ojas Lite: Low-bandwidth offline mode for tier-2/3 hostel networks"
     >
       {isLiteMode ? <WifiOff className="h-3 w-3" /> : <Wifi className="h-3 w-3" />}
-      <span>Ojas Lite: {isLiteMode ? "ON" : "OFF"}</span>
+      <span>Ojas Lite (Low-Data Mode): {isLiteMode ? "ON" : "OFF"}</span>
     </button>
   );
 }
