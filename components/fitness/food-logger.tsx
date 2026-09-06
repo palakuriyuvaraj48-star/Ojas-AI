@@ -23,6 +23,17 @@ import {
 } from "lucide-react";
 import { INDIAN_FOODS_DATABASE } from "@/lib/nutrition/indian-food-db";
 
+async function readJsonResponse<T>(response: Response): Promise<T> {
+  const contentType = response.headers.get("content-type") || "";
+  if (!response.ok) {
+    throw new Error(`Nutrition request failed with status ${response.status}`);
+  }
+  if (!contentType.includes("application/json")) {
+    throw new Error("Nutrition request returned a non-JSON response");
+  }
+  return response.json() as Promise<T>;
+}
+
 const QUICK_INDIAN_CHIPS = [
   "Idli Sambar",
   "Dal Tadka Rice",
@@ -48,9 +59,12 @@ export function FoodLogger() {
 
   useEffect(() => {
     fetch(`/api/nutrition/food?query=${searchQuery}`)
-      .then((res) => res.json())
+      .then((res) => readJsonResponse<any[]>(res))
       .then(setFoodResults)
-      .catch(() => setFoodResults([]));
+      .catch((error) => {
+        console.error("[FoodLogger] Food search failed:", error);
+        setFoodResults([]);
+      });
   }, [searchQuery]);
 
   const handleCustomFoodSubmit = (e: React.FormEvent) => {
@@ -76,7 +90,7 @@ export function FoodLogger() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ image: "uploaded" }),
       })
-        .then((res) => res.json())
+        .then((res) => readJsonResponse<any>(res))
         .then((data) => {
           setScannedEstimate(data);
           setScanning(false);
@@ -92,7 +106,7 @@ export function FoodLogger() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ foodQuery: mealName }),
     })
-      .then((res) => res.json())
+      .then((res) => readJsonResponse<any>(res))
       .then((data) => {
         setScannedEstimate(data);
         setScanning(false);

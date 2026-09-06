@@ -219,7 +219,7 @@ export function HostelMode() {
           </div>
 
           <div className="space-y-3">
-            {rankings.map((rank) => {
+            {rankings.map((rank, index) => {
               const isBest = rank.rank === 1;
               const isSolid = rank.rank === 2;
 
@@ -236,7 +236,7 @@ export function HostelMode() {
                 : t("nutrition_caution", "MIND PORTIONS");
 
               return (
-                <GlassCard key={rank.rank} className="p-4 border-white/10 space-y-3">
+                <GlassCard key={`${rank.rank}-${index}`} className="p-4 border-white/10 space-y-3">
                   <div className="flex items-center justify-between">
                     <span className={`rounded-lg px-2.5 py-1 text-[10px] font-extrabold tracking-wider border ${badgeColor}`}>
                       {label}

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Camera, Dumbbell, History, BarChart3, BookOpen, Save, Sparkles, Cpu, Play, Scale } from "lucide-react";
+import { Camera, Dumbbell, History, BarChart3, BookOpen, Save, Sparkles, Cpu, Play, Scale, Eye } from "lucide-react";
 import { GlassCard } from "@/components/ui/glass-card";
 import { useFormCoach } from "./form-coach/use-form-coach";
 import { CameraStage } from "./form-coach/camera-stage";
@@ -14,11 +14,12 @@ import { Tutorials } from "./form-coach/tutorials";
 import { WorkoutReplay } from "./form-coach/workout-replay";
 import { FormComparison } from "./form-coach/form-comparison";
 import { MovementAnalytics } from "./form-coach/movement-analytics";
+import { FormCoachDemo } from "./form-coach/form-coach-demo";
 import { deleteSession } from "@/lib/vision";
 import { useTranslation } from "@/lib/i18n";
 import { TranslationDictionary } from "@/lib/i18n/types";
 
-type Tab = "live" | "exercises" | "tutorials" | "replay" | "comparison" | "history" | "progress";
+type Tab = "demo" | "live" | "exercises" | "tutorials" | "replay" | "comparison" | "history" | "progress";
 
 interface TabConfig {
   id: Tab;
@@ -30,11 +31,12 @@ interface TabConfig {
 export function FormCoachView() {
   const coach = useFormCoach();
   const { t } = useTranslation();
-  const [tab, setTab] = useState<Tab>("live");
+  const [tab, setTab] = useState<Tab>("demo");
   const angles = coach.frame?.angles ?? {};
 
   const tabs: TabConfig[] = [
-    { id: "live", key: "form_coach_title", defaultLabel: "Live Coach", icon: <Camera className="h-4 w-4" /> },
+    { id: "demo", defaultLabel: "CV Interactive Demo", icon: <Eye className="h-4 w-4" /> },
+    { id: "live", key: "form_coach_title", defaultLabel: "Live Camera Coach", icon: <Camera className="h-4 w-4" /> },
     { id: "exercises", key: "workout_exercises", defaultLabel: "Exercises", icon: <Dumbbell className="h-4 w-4" /> },
     { id: "tutorials", defaultLabel: "Tutorials", icon: <BookOpen className="h-4 w-4" /> },
     { id: "replay", defaultLabel: "Workout Replay", icon: <Play className="h-4 w-4" /> },
@@ -44,20 +46,26 @@ export function FormCoachView() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-left max-w-7xl mx-auto">
       {/* Top Banner Header */}
-      <GlassCard className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between" glow>
+      <GlassCard className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between bg-gradient-to-r from-[#181a20] to-[#121316]" glow>
         <div className="flex items-center gap-3">
           <div className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-[#adc6ff] to-[#4d8eff]">
             <Sparkles className="h-6 w-6 text-[#131315]" />
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[.18em] text-[#adc6ff]">Computer vision</p>
+            <p className="text-xs font-semibold uppercase tracking-[.18em] text-[#adc6ff]">Computer Vision &amp; Pose Kinematics</p>
             <h2 className="text-xl font-bold text-white">{t("form_coach_title", "Smart Form Coach")}</h2>
-            <p className="text-xs text-white/50">{t("form_coach_subtitle", "Guided instructions on left • Real-time computer vision analysis on right.")}</p>
+            <p className="text-xs text-white/50">Real-time skeleton landmark detection, joint angles calculation, and bio-feedback.</p>
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          {tab === "demo" && (
+            <span className="flex items-center gap-1.5 rounded-full border border-blue-400/30 bg-blue-500/10 px-3.5 py-1.5 text-[11px] font-bold text-blue-300">
+              <Cpu className="h-3.5 w-3.5" />
+              Interactive CV Simulator Active
+            </span>
+          )}
           {coach.mode === "live" && coach.status === "live" && (
             <span className="flex items-center gap-1 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1.5 text-[11px] font-semibold text-emerald-300">
               <Cpu className="h-3.5 w-3.5" />MediaPipe Live Active
@@ -100,6 +108,8 @@ export function FormCoachView() {
       </div>
 
       {/* Content depending on selected tab */}
+      {tab === "demo" && <FormCoachDemo />}
+
       {tab === "live" && (
         <div className="grid gap-6 xl:grid-cols-[1fr_1.1fr]">
           <HowToPerform exercise={coach.exercise} movementPhase={coach.movementPhase} liveAngles={angles} />

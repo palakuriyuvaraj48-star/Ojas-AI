@@ -837,7 +837,8 @@ export function WorkoutView() {
               <div className="pt-2">
                 <button
                   onClick={() => {
-                    const exName = currentWorkout.exercises[activeExerciseIndex]?.name || "squat";
+                    const activeExercise = currentWorkout?.exercises?.[activeExerciseIndex];
+                    const exName = activeExercise?.name || "squat";
                     let exId = "squat";
                     const lower = exName.toLowerCase();
                     if (lower.includes("squat")) exId = "squat";

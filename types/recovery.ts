@@ -1,121 +1,54 @@
-export type ReadinessLevel = "fresh" | "moderate" | "fatigued" | "overreaching";
-export type SorenessLevel = "none" | "low" | "medium" | "high";
-export type MobilityDifficulty = "beginner" | "intermediate" | "advanced";
-export type StretchType = "pre-workout" | "post-workout" | "rest-day" | "desk" | "travel";
-export type RestDayActivity = "full-rest" | "walking" | "yoga" | "stretching" | "breathing" | "light-cycling";
+/**
+ * Recovery and Readiness Data Models for OJAS AI
+ */
 
-export interface RecoveryScore {
-  score: number;
-  readiness: ReadinessLevel;
-  confidence: number;
-  trend: "improving" | "stable" | "declining";
-  explanation: string;
-  fatigueLevel: number;
-  muscleReadiness: { muscle: string; readiness: number; soreness: SorenessLevel }[];
-}
-
-export interface SleepLog {
+export interface SleepData {
   date: string;
-  duration: number;
-  quality: number;
-  sleepDebt: number;
-  deepSleep: number;
-  remSleep: number;
-  consistency: number;
+  duration: number; // in hours (e.g. 7.4)
+  quality: "poor" | "fair" | "good" | "excellent";
   bedtime: string;
   wakeTime: string;
-  aiInsight: string;
+  interruptions: number;
+  notes: string;
 }
 
-export interface DOMSLog {
-  id: string;
+export interface FatigueData {
   date: string;
-  muscle: string;
-  sorenessLevel: SorenessLevel;
-  painScore: number;
-  notes?: string;
-  recommendedAction: string;
+  level: number; // 0-10
+  muscularFatigue: number; // 0-10
+  mentalFatigue: number; // 0-10
+  systemicFatigue: number; // 0-10
+  trend: "improving" | "stable" | "declining";
 }
 
-export interface MobilityPlan {
-  id: string;
-  title: string;
-  difficulty: MobilityDifficulty;
-  duration: number;
-  targetMuscles: string[];
-  exercises: {
-    name: string;
-    duration: number;
-    sets: number;
-    reps?: string;
-    hold?: string;
-    instructions: string;
-  }[];
-  focus: string;
-  aiNote: string;
-}
-
-export interface StretchingPlan {
-  id: string;
-  type: StretchType;
-  title: string;
-  duration: number;
-  exercises: {
-    name: string;
-    duration: number;
-    instructions: string;
-    targetArea: string;
-  }[];
-}
-
-export interface RestDayPlan {
-  id: string;
+export interface DomsData {
   date: string;
-  recommendation: RestDayActivity;
-  duration: number;
-  reasoning: string;
-  alternatives: RestDayActivity[];
-  confidence: number;
-  expectedBenefit: string;
-}
-
-export interface RecoveryNotification {
-  id: string;
-  type: "warning" | "info" | "success" | "reminder";
-  title: string;
-  message: string;
-  read: boolean;
-  createdAt: string;
-  actionLabel?: string;
-  actionRoute?: string;
-}
-
-export interface RecoveryAnalytics {
-  period: "weekly" | "monthly";
-  recoveryTrend: { day: string; score: number; readiness: number }[];
-  sleepTrend: { day: string; duration: number; quality: number }[];
-  fatigueTrend: { day: string; fatigue: number }[];
-  trainingLoadTrend: { day: string; volume: number; intensity: number }[];
-  restDaysTaken: number;
-  averageRecovery: number;
-  topRiskFactors: string[];
-  aiInsight: string;
-  weeklyReview: {
-    patterns: string[];
-    improvements: string[];
-    actionItems: string[];
+  bodyRegions: {
+    legs: number; // 0-10 soreness level
+    chest: number;
+    back: number;
+    shoulders: number;
+    arms?: number;
+    core?: number;
   };
+  previousTraining: string;
+  expectedRecoveryDays: number;
 }
 
-export interface RecoveryHistoryEntry {
-  id: string;
-  date: string;
-  recoveryScore: number;
-  readiness: ReadinessLevel;
-  sleepDuration: number;
-  sleepQuality: number;
-  fatigueLevel: number;
-  trainingLoad: number;
-  aiRecommendation: string;
-  userNotes?: string;
+export interface HydrationData {
+  logged: number; // ml
+  target: number; // ml
+  percentage: number;
 }
+
+export interface RecoveryScore {
+  overall: number; // 0-100
+  sleep: number;
+  fatigue: number;
+  soreness: number;
+  stressLevel: number;
+  readiness: "fresh" | "moderate" | "fatigued" | "overreaching";
+  trend: number; // change from yesterday
+}
+
+export type StretchType = "pre-workout" | "post-workout" | "rest-day" | "desk" | "travel";
