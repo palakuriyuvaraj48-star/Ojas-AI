@@ -43,7 +43,7 @@ export function AICoachChat() {
     fetch("/api/ai/health?init=true")
       .then((res) => res.json())
       .then((data) => setAiHealth(data))
-      .catch(() => setAiHealth({ status: "ready", model: "gemma3:4b", ollama: false }));
+      .catch(() => setAiHealth({ status: "ready", model: "ojas-adaptive-engine", ollama: false }));
   }, []);
 
   const handleSend = async (text: string) => {

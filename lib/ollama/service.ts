@@ -1,5 +1,5 @@
 /**
- * Ojas AI - Ollama Gemma 3 4B Fitness Intelligence Service
+ * Ojas AI - Adaptive Decision Engine Fitness Intelligence Service
  * Handles life-cycle management, background Ollama process launching,
  * Fitness Knowledge RAG integration, deterministic state classification,
  * structured JSON inference, response validation, and sports-science fallbacks.
@@ -98,7 +98,7 @@ export interface StructuredFitnessRecommendation {
 export function getOllamaConfig(): OllamaConfig {
   return {
     baseUrl: process.env.OLLAMA_BASE_URL || "http://127.0.0.1:11434",
-    model: process.env.OLLAMA_MODEL || "gemma3:4b",
+     model: process.env.OLLAMA_MODEL || "ojas-adaptive-engine",
     timeoutSeconds: Number(process.env.OLLAMA_TIMEOUT || "120"),
   };
 }
@@ -356,7 +356,7 @@ export function classifyAdaptiveState(context: FitnessContextInput): {
 }
 
 /**
- * Builds structured user fitness state context into a clean JSON block for Gemma 3 4B.
+ * Builds structured user fitness state context into a clean JSON block for the Adaptive Decision Engine.
  */
 function buildContextBlock(ctx: FitnessContextInput): string {
   if (ctx.digital_twin) {
@@ -565,7 +565,7 @@ export function validateFitnessRecommendation(
 }
 
 /**
- * Generates a structured fitness recommendation from Ollama (Gemma 3 4B)
+ * Generates a structured fitness recommendation from Ollama (Adaptive Decision Engine)
  * integrating Digital Twin state, Fitness Knowledge RAG, and response validation.
  */
 export async function generateFitnessResponse(

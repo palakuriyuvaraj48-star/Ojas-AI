@@ -29,7 +29,7 @@ export function RecoveryDashboard() {
   const { result, signals } = useRecovery();
 
   const [recoveryData, setRecoveryData] = useState({
-    todayScore: 78,
+    todayScore: 75,
     sleepData: {
       duration: 7.4,
       quality: "good" as const,

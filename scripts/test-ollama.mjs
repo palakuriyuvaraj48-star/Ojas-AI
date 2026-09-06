@@ -1,7 +1,7 @@
 /**
  * Ojas AI - Complete Fitness Intelligence Engine Test Suite
  * Evaluates:
- * 1. Ollama server reachability & Gemma 3 4B model presence
+ * 1. Ollama server reachability & Adaptive Decision Engine model presence
  * 2. Fitness Knowledge RAG retrieval accuracy
  * 3. Medical safety red flags & scope boundary enforcement
  * 4. User A (High Recovery) vs User B (Low Recovery/Exam Stress) adaptation comparison
@@ -11,13 +11,13 @@
  */
 
 const BASE_URL = process.env.OLLAMA_BASE_URL || "http://127.0.0.1:11434";
-const TARGET_MODEL = process.env.OLLAMA_MODEL || "gemma3:4b";
+const TARGET_MODEL = process.env.OLLAMA_MODEL || "ojas-adaptive-engine";
 const APP_URL = "http://localhost:3000";
 
 async function runTests() {
   console.log("\n=======================================================");
   console.log("  OJAS AI — FITNESS INTELLIGENCE ENGINE TEST SUITE");
-  console.log("  (Digital Twin + RAG + Ollama + Gemma 3 4B + Validator)");
+  console.log("  (Digital Twin + RAG + Ollama + Adaptive Decision Engine + Validator)");
   console.log("=======================================================\n");
 
   let passed = 0;
@@ -49,7 +49,7 @@ async function runTests() {
   }
 
   // ----------------------------------------------------
-  // TEST 2: Gemma 3 4B Model Presence
+  // TEST 2: Adaptive Decision Engine Model Presence
   // ----------------------------------------------------
   console.log("\n[2/7] Verifying required model presence...");
   const hasTargetModel = modelsList.some(m => {

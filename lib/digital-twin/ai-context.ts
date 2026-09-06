@@ -1,7 +1,7 @@
 /**
  * Digital Twin AI Context Builder
  * Transforms the user's active Digital Twin and deterministic analytics
- * into a compact, structured context for Ollama / Gemma 3 4B.
+ * into a compact, structured context for the Adaptive Decision Engine.
  */
 
 import { DigitalTwin } from "./types";

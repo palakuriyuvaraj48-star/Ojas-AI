@@ -43,6 +43,7 @@ import { getSessions } from "@/lib/vision/session-storage";
 import { useTranslation } from "@/lib/i18n";
 import { TranslationDictionary } from "@/lib/i18n/types";
 import { SPORT_REGISTRY } from "@/lib/sports";
+import { userState } from "@/lib/userState";
 import { useAdaptiveState } from "@/components/providers/adaptive-state-provider";
 
 type TwinTab = "twin" | "what-changed" | "timeline" | "simulator" | "forecast";
@@ -83,7 +84,7 @@ export function TwinView() {
   };
 
   // Dynamic simulation outcomes
-  const w = profile?.weight || 78.5;
+  const w = profile?.weight || userState.profile.weight;
   const bf = profile?.bodyFat || 22.4;
 
   // Simulation Sliders
@@ -423,7 +424,7 @@ export function TwinView() {
                       </span>
                     </div>
                     <p className="text-xs text-white/70 leading-relaxed">
-                      Your Digital Twin continuously feeds your live computer-vision form and workout logs into the local Gemma 3 4B AI model to dynamically adjust training volume, intensity, and recovery.
+                      Your Digital Twin continuously feeds your live computer-vision form and workout logs into the Adaptive Decision Engine to dynamically adjust training volume, intensity, and recovery.
                     </p>
                     <Link
                       href="/coach"
@@ -456,7 +457,7 @@ export function TwinView() {
                       </div>
                       <div className="p-2.5 rounded-xl bg-white/5 border border-white/5">
                         <span className="text-[10px] text-white/50 block">Primary Gap</span>
-                        <strong className="text-amber-300 font-bold">Agility (-18 pts)</strong>
+                        <strong className="text-amber-300 font-bold">{userState.digitalTwin.sport.gapName} ({userState.digitalTwin.sport.gap} pts)</strong>
                       </div>
                     </div>
                     <Link

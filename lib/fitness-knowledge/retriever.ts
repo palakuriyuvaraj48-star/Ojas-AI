@@ -1,7 +1,7 @@
 /**
  * Fitness Knowledge Retriever (RAG)
  * Retrieves situational and query-relevant sports-science principles
- * for Gemma 3 4B prompt injection without bloating context.
+ * for Adaptive Decision Engine prompt injection without bloating context.
  */
 
 import { KnowledgeItem, RetrievedKnowledge } from "./types";
@@ -141,7 +141,7 @@ export function retrieveFitnessKnowledge(
     );
   }
 
-  // Build compact context summary string for Gemma
+  // Build compact context summary string for the Adaptive Decision Engine
   const contextSummary = selectedItems
     .map(
       (item) =>

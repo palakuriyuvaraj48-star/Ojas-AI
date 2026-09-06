@@ -1,10 +1,10 @@
 /**
  * Ojas AI - Ollama Setup & Verification Helper
- * Verifies local Ollama installation, runs health checks, and verifies Gemma 3 4B.
+ * Verifies local Ollama installation, runs health checks, and verifies Adaptive Decision Engine.
  */
 
 const BASE_URL = process.env.OLLAMA_BASE_URL || "http://127.0.0.1:11434";
-const TARGET_MODEL = process.env.OLLAMA_MODEL || "gemma3:4b";
+const TARGET_MODEL = process.env.OLLAMA_MODEL || "ojas-adaptive-engine";
 
 async function main() {
   console.log("\n[OJAS AI] Running Ollama Setup & Verification...");

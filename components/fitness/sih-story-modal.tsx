@@ -31,7 +31,7 @@ export function SIHStoryModal() {
         className="fixed bottom-20 right-6 z-40 flex items-center gap-2 rounded-full bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 text-black px-4 py-2 text-xs font-black shadow-xl shadow-amber-500/20 hover:scale-105 active:scale-95 transition"
       >
         <Award className="h-4 w-4" />
-        SIH 2024 / 2025 Evaluator Guide
+        SIH 2026 Evaluator Guide
       </button>
 
       <AnimatePresence>

@@ -17,7 +17,7 @@ interface OjasScoreSummaryProps {
 export function OjasScoreSummary({
   movementScore = 92,
   nutritionScore = 84,
-  recoveryScore = 79,
+  recoveryScore = 75,
   consistencyScore = 94,
   onNavigate,
 }: OjasScoreSummaryProps) {

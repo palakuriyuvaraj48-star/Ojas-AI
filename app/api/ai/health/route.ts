@@ -28,7 +28,7 @@ export async function GET(request: Request) {
     return NextResponse.json(
       {
         ollama: false,
-        model: process.env.OLLAMA_MODEL || "gemma3:4b",
+        model: process.env.OLLAMA_MODEL || "ojas-adaptive-engine",
         model_available: false,
         knowledge_base: true,
         digital_twin: true,

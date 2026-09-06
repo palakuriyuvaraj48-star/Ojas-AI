@@ -12,8 +12,8 @@ type AdaptiveStateContextValue = {
 };
 
 const defaults: DashboardState = {
-  availableTime: 35, energyLevel: "energetic", sleepDuration: 7.5,
-  stressLevel: "low", hostelMode: true, recovery: 82, trainingLoadYesterday: 60,
+  availableTime: 35, energyLevel: "energetic", sleepDuration: 7.4,
+  stressLevel: "low", hostelMode: true, recovery: 75, trainingLoadYesterday: 60,
   currentGoal: "strength", lastWorkoutIntensity: 75, isExamPeriod: false,
 };
 const AdaptiveStateContext = createContext<AdaptiveStateContextValue | null>(null);

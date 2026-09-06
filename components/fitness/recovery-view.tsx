@@ -32,7 +32,7 @@ export function RecoveryView() {
 
   if (!profile || !calorieTargets || !macroTargets) return null;
 
-  const recoveryScore = 78;
+  const recoveryScore = 75;
   const fatigue = 35;
 
   const tabs: { id: string; key?: keyof TranslationDictionary; label: string; icon: any }[] = [

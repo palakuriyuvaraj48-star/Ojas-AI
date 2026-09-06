@@ -65,7 +65,7 @@ export async function POST(request: Request) {
       digital_twin: digitalTwinContext,
     };
 
-    // 4. Generate structured fitness recommendation from Ollama (Gemma 3 4B)
+    // 4. Generate structured fitness recommendation from Ollama (Adaptive Decision Engine)
     const result = await generateFitnessResponse(userPrompt, context);
 
     return NextResponse.json({
@@ -89,7 +89,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         status: "error",
-        model: process.env.OLLAMA_MODEL || "gemma3:4b",
+         model: process.env.OLLAMA_MODEL || "ojas-adaptive-engine",
         source: "fallback",
         message: err?.message || "Failed to process fitness coach request",
         recommendation: {

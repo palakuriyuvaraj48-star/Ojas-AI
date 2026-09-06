@@ -39,7 +39,7 @@ export function AICoachHome({ setActiveTab }: AICoachHomeProps) {
     fetch("/api/ai/health?init=true")
       .then((res) => res.json())
       .then((data) => setAiHealth(data))
-      .catch(() => setAiHealth({ status: "unavailable", model: "gemma3:4b", ollama: false }));
+      .catch(() => setAiHealth({ status: "unavailable", model: "ojas-adaptive-engine", ollama: false }));
   }, []);
 
   const fetchDigitalTwinRec = async () => {
@@ -282,18 +282,18 @@ export function AICoachHome({ setActiveTab }: AICoachHomeProps) {
                 className="inline-flex items-center gap-1.5 rounded-xl bg-cyan-400/10 border border-cyan-400/30 px-3 py-1.5 text-xs font-bold text-cyan-300 hover:bg-cyan-400/20 transition disabled:opacity-50 shadow-sm"
               >
                 <Sparkles className={`h-3.5 w-3.5 ${loadingRec ? "animate-spin" : ""}`} />
-                {loadingRec ? "Reasoning with Gemma 3..." : "Personalize via Digital Twin"}
+                {loadingRec ? "Reasoning with Adaptive Engine..." : "Personalize via Digital Twin"}
               </button>
             </div>
 
-            {/* Live Digital Twin AI Recommendation Card (Gemma 3 4B) */}
+            {/* Live Digital Twin AI Recommendation Card (Adaptive Decision Engine) */}
             {digitalTwinRec && digitalTwinRec.recommendation && (
               <GlassCard className="p-5 border-cyan-400/30 bg-gradient-to-r from-cyan-950/30 via-slate-900/60 to-cyan-950/20 relative overflow-hidden">
                 <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/5 pb-3">
                   <div className="flex items-center gap-2">
                     <span className="h-2 w-2 rounded-full bg-cyan-400 animate-pulse" />
                     <span className="text-xs font-bold uppercase tracking-wider text-cyan-300">
-                      Gemma 3 4B · Live Digital Twin Adaptation
+                      Adaptive Decision Engine · Live Digital Twin Adaptation
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
