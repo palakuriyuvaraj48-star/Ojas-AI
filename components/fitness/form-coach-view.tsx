@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Camera, Dumbbell, History, BarChart3, BookOpen, Save, Sparkles, Cpu, Play, Scale, Eye } from "lucide-react";
 import { GlassCard } from "@/components/ui/glass-card";
@@ -18,6 +18,7 @@ import { FormCoachDemo } from "./form-coach/form-coach-demo";
 import { deleteSession } from "@/lib/vision";
 import { useTranslation } from "@/lib/i18n";
 import { TranslationDictionary } from "@/lib/i18n/types";
+import { FeatureDiscoverySection } from "@/components/feature-discovery";
 
 type Tab = "demo" | "live" | "exercises" | "tutorials" | "replay" | "comparison" | "history" | "progress";
 
@@ -28,10 +29,14 @@ interface TabConfig {
   icon: React.ReactNode;
 }
 
-export function FormCoachView() {
+export function FormCoachView({ initialTab }: { initialTab?: Tab }) {
   const coach = useFormCoach();
   const { t } = useTranslation();
-  const [tab, setTab] = useState<Tab>("demo");
+  const [tab, setTab] = useState<Tab>(initialTab || "demo");
+
+  useEffect(() => {
+    if (initialTab) setTab(initialTab);
+  }, [initialTab]);
   const angles = coach.frame?.angles ?? {};
 
   const tabs: TabConfig[] = [
@@ -80,6 +85,22 @@ export function FormCoachView() {
           </button>
         </div>
       </GlassCard>
+
+      <FeatureDiscoverySection
+        eyebrow="Form Coach"
+        title="Analyze movement, then review what changed"
+        description="Explore the existing movement tools. Live camera analysis remains opt-in and starts only after you choose Start Live Camera."
+        features={[
+          { title: "Live Form Coach", description: "Open the existing permissioned camera flow.", icon: Camera, onOpen: () => setTab("live"), status: "Available" },
+          { title: "Exercise Selection", description: "Choose from the existing supported exercises.", icon: Dumbbell, onOpen: () => setTab("exercises"), status: "Available" },
+          { title: "Movement Analysis", description: "Review movement quality and available analytics.", href: "/movement/analytics", icon: BarChart3, status: "Available" },
+          { title: "Biomechanics", description: "Explore the existing biomechanics analysis.", href: "/movement/biomechanics", icon: Scale, status: "Available" },
+          { title: "Motion Lab", description: "Open the movement-analysis workspace.", href: "/movement/motion-lab", icon: Eye, status: "Available" },
+          { title: "Session History", description: "Review previous form-analysis sessions.", href: "/movement/session-history", icon: History, status: "Available" },
+          { title: "Workout Replay", description: "Review supported previous workout sessions.", href: "/movement/workout-replay", icon: Play, status: "Available" },
+          { title: "Tutorials", description: "Learn the existing Form Coach workflow.", href: "/movement/tutorials", icon: BookOpen, status: "Available" },
+        ]}
+      />
 
       {/* Exercise Quick Selector for instant switching */}
       <GlassCard className="p-3 bg-[#131418] border-white/10 flex flex-wrap items-center justify-between gap-3">

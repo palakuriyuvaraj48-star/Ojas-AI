@@ -44,15 +44,15 @@ export function OjasScoreSummary({
   const getOpportunityRecommendation = (key: string) => {
     switch (key) {
       case "recovery":
-        return t("recovery_sleep_target", "Prioritize 7.5h sleep tonight and reduce heavy loading tomorrow.");
+        return t("recovery_sleep_target", "Recovery is your limiting factor. Prioritize 7.5h sleep tonight and reduce heavy loading tomorrow.");
       case "nutrition":
-        return t("nutrition_protein_target", "Boost daily protein pacing by adding 2 boiled eggs or soya chunks at mess/lunch.");
+        return t("nutrition_protein_target", "Fuel alignment matters. Add 2 boiled eggs or soya chunks at mess/lunch to hit protein targets.");
       case "movement":
-        return t("workout_title", "Complete today's scheduled session to maintain neuromuscular adaptations.");
+        return t("workout_title", "Consistent practice > perfect sessions. Complete today's scheduled movement to maintain adaptations.");
       case "consistency":
-        return t("progress_consistency", "Keep workout streaks unbroken by doing at least a 15-minute quick session.");
+        return t("progress_consistency", "Your streak is your leverage. Keep it unbroken with a 15-minute quick session if full routine isn't possible.");
       default:
-        return t("dashboard_what_to_do_today", "Maintain your balanced routine and stay hydrated.");
+        return t("dashboard_what_to_do_today", "Your foundation is solid. Stay consistent and hydrated.");
     }
   };
 
@@ -79,8 +79,8 @@ export function OjasScoreSummary({
               <Sparkles className="h-3 w-3" />
               Unified Index
             </span>
-            <h3 className="text-xl font-bold text-white tracking-tight">{t("dashboard_ojas_score", "OJAS SCORE")}</h3>
-            <p className="text-xs text-white/60">Holistic state across 4 vital pillars</p>
+            <h3 className="text-xl font-bold text-white tracking-tight">{t("dashboard_ojas_score", "OJAS INDEX")}</h3>
+            <p className="text-xs text-white/60">Weighted blend: movement, nutrition, recovery, consistency</p>
           </div>
         </div>
 
@@ -125,15 +125,17 @@ export function OjasScoreSummary({
           className="rounded-xl bg-[#adc6ff]/10 border border-[#adc6ff]/20 p-3.5 w-full md:w-64 cursor-pointer hover:bg-[#adc6ff]/15 transition group"
         >
           <div className="flex items-center justify-between text-[11px] font-bold text-[#adc6ff] mb-1">
-            <span>{t("dashboard_biggest_opportunity", "BIGGEST OPPORTUNITY")}</span>
+            <span>{t("dashboard_biggest_opportunity", "WHERE TRUTH MEETS ACTION")}</span>
             <span className="capitalize">{weakest.name} ({weakest.score}/100)</span>
           </div>
           <p className="text-xs text-white/80 line-clamp-2">
             {getOpportunityRecommendation(weakest.key)}
           </p>
-          <div className="mt-2 text-[10px] text-[#adc6ff] font-medium flex items-center gap-1 group-hover:underline">
-            {t("common_view_details", "Take Action")} <ArrowRight className="h-3 w-3" />
-          </div>
+          {onNavigate ? (
+            <span className="mt-2 text-[10px] text-[#adc6ff] font-medium flex items-center gap-1 group-hover:underline">
+               Take action → <ArrowRight className="h-3 w-3" />
+            </span>
+          ) : null}
         </div>
       </div>
     </GlassCard>

@@ -17,9 +17,11 @@ import {
   Calendar,
   TrendingUp,
   Brain,
+  Sparkles,
 } from "lucide-react";
 import { useTranslation } from "@/lib/i18n";
 import { TranslationDictionary } from "@/lib/i18n/types";
+import { FeatureDiscoverySection } from "@/components/feature-discovery";
 
 interface CoachChatProps {
   initialTab?: string;
@@ -72,6 +74,20 @@ export function CoachChat({ initialTab }: CoachChatProps) {
 
   return (
     <div className="space-y-6">
+      <FeatureDiscoverySection
+        eyebrow="Your AI Coach"
+        title="Ask OJAS, then act on your context"
+        description="Get personalized guidance based on your current fitness context. These links open existing OJAS coach experiences."
+        features={[
+          { title: "Coach Chat", description: "Ask OJAS questions and receive context-aware guidance.", href: "/coach/chat", icon: MessageSquare, status: "Available" },
+          { title: "Plans", description: "Review personalized training and planning recommendations.", href: "/coach/plans", icon: Calendar, status: "Available" },
+          { title: "Insights", description: "Explore insights from your current fitness context.", href: "/coach/insights", icon: TrendingUp, status: "Available" },
+          { title: "Memory", description: "Review information used to personalize your experience.", href: "/coach/memory", icon: Brain, status: "Available" },
+          { title: "Voice Coach", description: "Use the existing voice-based coaching experience.", href: "/coach/voice", icon: Mic, status: "Experimental" },
+          { title: "Nutrition Coach", description: "Get coaching focused on nutrition.", href: "/coach/nutrition", icon: Sparkles, status: "Available" },
+          { title: "Recovery Coach", description: "Get guidance focused on recovery.", href: "/coach/recovery", icon: Sparkles, status: "Available" },
+        ]}
+      />
       {/* Navigation Tabs Header */}
       <GlassCard className="p-3 border-white/5 bg-[rgba(24,23,26,0.35)] overflow-x-auto">
         <div className="flex items-center gap-1.5 min-w-[620px] md:min-w-0">
