@@ -19,8 +19,9 @@ import {
   Waves,
   AlertTriangle,
   HeartPulse,
-  Activity,
+   Activity,
   Flame,
+  TrendingUp,
   ChevronDown,
   ChevronUp,
   ArrowRight,
@@ -30,6 +31,7 @@ import {
 import Link from "next/link";
 import { useAdaptiveState } from "@/components/providers/adaptive-state-provider";
 import { DecisionLogicDiagram } from "@/components/fitness/decision-logic-diagram";
+import { DecisionReasoning } from "@/components/fitness/decision-reasoning";
 import { OjasScoreSummary } from "@/components/fitness/ojas-score-summary";
 import { SportJourneyCard } from "@/components/fitness/sport-journey-card";
 import { useTranslation } from "@/lib/i18n";
@@ -260,7 +262,10 @@ export function DashboardView() {
         </div>
       </GlassCard>
 
-      {/* HERO SECTION: REAL-TIME WHAT SHOULD I DO TODAY CARD */}
+      {/* DECISION REASONING */}
+      <DecisionReasoning />
+
+      {/* HERO SECTION: RECOVERY-GATED TODAY PLAN */}
       <GlassCard className="relative overflow-hidden p-6 border-white/15 bg-gradient-to-b from-[#181a20] to-[#121316] shadow-2xl" glow>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-white/10">
           <div>
@@ -279,7 +284,7 @@ export function DashboardView() {
               )}
             </div>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-              {t("dashboard_what_to_do_today", "What should I do today?")}
+                {t("dashboard_what_to_do_today", "What your body needs today")}
             </h2>
           </div>
 
@@ -301,9 +306,9 @@ export function DashboardView() {
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             <div className="space-y-1.5">
               <div className="flex items-center gap-2">
-                <span className="rounded-md bg-[#adc6ff]/20 text-[#adc6ff] text-[10px] font-bold px-2 py-0.5 uppercase tracking-wider">
-                  {recommendation.duration} Mins Split
-                </span>
+                 <span className="rounded-md bg-[#adc6ff]/20 text-[#adc6ff] text-[10px] font-bold px-2 py-0.5 uppercase tracking-wider">
+                   Adaptive Window
+                 </span>
                 <span className="text-white/40 text-xs flex items-center gap-1">
                   <Clock className="h-3 w-3" />
                   {recommendation.adaptationFactor}
@@ -323,7 +328,7 @@ export function DashboardView() {
                 className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#adc6ff] to-[#4d8eff] px-5 py-3 text-xs font-extrabold text-[#131315] shadow-lg shadow-blue-500/20 hover:scale-105 transition"
               >
                 <Play className="h-4 w-4 fill-current" />
-                START TODAY&apos;S PLAN
+                START ADAPTIVE SESSION
               </Link>
             </div>
           </div>
@@ -350,7 +355,7 @@ export function DashboardView() {
             <div className="flex items-center justify-between text-xs font-bold text-[#adc6ff]">
               <span className="flex items-center gap-1.5">
                 <Sparkles className="h-3.5 w-3.5" />
-                Why this recommendation?
+                Why this plan, right now?
               </span>
               {showReasoning ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
             </div>
@@ -369,7 +374,7 @@ export function DashboardView() {
           {/* Alternatives */}
           {recommendation.alternatives.length > 0 && (
             <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
-              <span className="font-bold text-white/40">Alternatives:</span>
+              <span className="font-bold text-white/40">Or try:</span>
               {recommendation.alternatives.map((alt, i) => (
                 <span key={i} className="rounded-lg bg-white/5 border border-white/5 px-2.5 py-1 text-[11px] text-white/70">
                   {alt}
@@ -382,19 +387,19 @@ export function DashboardView() {
         {/* COMPOSITE STATUS GAUGES */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
           <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/10 text-center space-y-1">
-            <span className="text-[10px] uppercase font-bold text-white/50 block">Sleep Duration</span>
+            <span className="text-[10px] uppercase font-bold text-white/50 block">Sleep (Last Night)</span>
             <div className={`text-lg sm:text-xl font-extrabold ${dashState.sleepDuration >= 7 ? "text-emerald-400" : "text-amber-400"}`}>
               {dashState.sleepDuration.toFixed(1)}h
             </div>
-            <span className="text-[10px] text-white/40">{dashState.sleepDuration >= 7 ? "Optimal" : "Restricted"}</span>
+            <span className="text-[10px] text-white/40">{dashState.sleepDuration >= 7 ? "Target met" : "Short"}</span>
           </div>
 
           <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/10 text-center space-y-1">
-            <span className="text-[10px] uppercase font-bold text-white/50 block">Recovery Score</span>
+            <span className="text-[10px] uppercase font-bold text-white/50 block">Recovery Index</span>
             <div className={`text-lg sm:text-xl font-extrabold ${dashState.recovery >= 75 ? "text-emerald-400" : dashState.recovery >= 50 ? "text-amber-400" : "text-rose-400"}`}>
               {dashState.recovery}/100
             </div>
-            <span className="text-[10px] text-white/40">{dashState.recovery >= 75 ? "Fresh" : dashState.recovery >= 50 ? "Moderate" : "Overreaching"}</span>
+            <span className="text-[10px] text-white/40">{dashState.recovery >= 75 ? "Ready for load" : dashState.recovery >= 50 ? "Modulated" : "Deficit — protect"}</span>
           </div>
 
           <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/10 text-center space-y-1">
@@ -413,6 +418,38 @@ export function DashboardView() {
             <span className="text-[10px] text-white/40">Auto-Regulated</span>
           </div>
         </div>
+      </GlassCard>
+
+      {/* ADAPTATION STORY: Yesterday → Today */}
+      <GlassCard className="p-5 border-white/10 bg-[rgba(24,23,26,0.35)]">
+        <h3 className="font-bold text-white text-sm flex items-center gap-2 mb-4">
+          <TrendingUp className="h-4 w-4 text-[#adc6ff]" />
+          Adaptation Story: How Yesterday Shaped Today&apos;s Plan
+        </h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+          <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5 text-center">
+            <span className="text-[9px] text-white/50 uppercase font-bold block">Yesterday&apos;s Recovery</span>
+            <div className="font-black text-white mt-1">{dashState.trainingLoadYesterday}/100 load</div>
+            <div className="text-[10px] text-white/40">Training load</div>
+          </div>
+          <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5 text-center">
+            <span className="text-[9px] text-white/50 uppercase font-bold block">Today&apos;s Recovery</span>
+            <div className={`font-black mt-1 ${dashState.recovery >= 75 ? "text-emerald-400" : "text-amber-400"}`}>{dashState.recovery}/100</div>
+            <div className="text-[10px] text-white/40">Adapted</div>
+          </div>
+          <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5 text-center">
+            <span className="text-[9px] text-white/50 uppercase font-bold block">Sleep Change</span>
+            <div className="font-black text-cyan-300 mt-1">7.4h → {dashState.sleepDuration.toFixed(1)}h</div>
+            <div className="text-[10px] text-white/40">Auto-regulated</div>
+          </div>
+          <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5 text-center">
+            <span className="text-[9px] text-white/50 uppercase font-bold block">Adaptation</span>
+            <div className="font-black text-[#adc6ff] mt-1 text-[10px]">{recommendation.adaptationFactor}</div>
+          </div>
+        </div>
+        <p className="text-[10px] text-white/50 mt-3 italic">
+          This plan changed because: {recommendation.reasoning}
+        </p>
       </GlassCard>
 
       {/* DECISION LOGIC DIAGRAM VISUALIZATION */}

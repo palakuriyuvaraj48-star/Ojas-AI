@@ -192,7 +192,7 @@ export function AICoachHome({ setActiveTab }: AICoachHomeProps) {
           {/* Today's Summary */}
           <GlassCard className="space-y-4">
             <h3 className="font-bold text-white text-sm flex items-center gap-2">
-              <Activity className="h-4.5 w-4.5 text-[#adc6ff]" /> Today's Biometric Log Summary
+              <Award className="h-4.5 w-4.5 text-[#adc6ff]" /> Today's Biometric Read
             </h3>
             
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -274,7 +274,7 @@ export function AICoachHome({ setActiveTab }: AICoachHomeProps) {
           <div className="space-y-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h3 className="font-bold text-white text-sm flex items-center gap-2">
-                <Compass className="h-4.5 w-4.5 text-[#adc6ff]" /> AI Suggestions & Explanations
+                <Compass className="h-4.5 w-4.5 text-[#adc6ff]" /> Real-Time Adaptive Guidance
               </h3>
               <button
                 onClick={fetchDigitalTwinRec}
@@ -282,7 +282,7 @@ export function AICoachHome({ setActiveTab }: AICoachHomeProps) {
                 className="inline-flex items-center gap-1.5 rounded-xl bg-cyan-400/10 border border-cyan-400/30 px-3 py-1.5 text-xs font-bold text-cyan-300 hover:bg-cyan-400/20 transition disabled:opacity-50 shadow-sm"
               >
                 <Sparkles className={`h-3.5 w-3.5 ${loadingRec ? "animate-spin" : ""}`} />
-                {loadingRec ? "Reasoning with Adaptive Engine..." : "Personalize via Digital Twin"}
+                {loadingRec ? "Recalculating from real state..." : "Recalculate from Real State"}
               </button>
             </div>
 

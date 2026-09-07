@@ -91,23 +91,21 @@ export function RecoveryDashboard() {
               </span>
               <span className="text-white/40 text-xs">Transparent Calculation</span>
             </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-              Today&apos;s Recovery Score
-            </h2>
-            <p className="text-sm font-semibold text-white/90 max-w-lg">
-              {recoveryData.todayScore}/100 — {recoveryData.todayScore >= 75 ? "Moderate to high training safe" : recoveryData.todayScore >= 50 ? "Moderate training safe" : "Recovery priority"}
-            </p>
-            <p className="text-xs text-white/60 max-w-lg">
-              {recoveryData.todayScore >= 80 && "Optimal Recovery: Central nervous system is primed for progressive overload."}
-              {recoveryData.todayScore >= 60 && recoveryData.todayScore < 80 && "Adequate Recovery: Moderate-to-high intensity training supported."}
-              {recoveryData.todayScore < 60 && "Active restoration recommended to prevent overreaching."}
-            </p>
+               <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                 Recovery Index
+               </h2>
+               <p className="text-sm font-semibold text-white/90 max-w-lg">
+                 {recoveryData.todayScore}/100 — {recoveryData.todayScore >= 75 ? "Moderate to high — training is supported" : recoveryData.todayScore >= 50 ? "Moderate training safe" : "Recovery priority — protect your foundation"}
+               </p>
+               <p className="text-xs text-white/60 max-w-lg">
+                 Calculated from: Sleep 35% + Fatigue 30% + Training Load 20% + Nutrition 15%. Recovery is not laziness — it's where adaptation happens.
+               </p>
           </div>
 
           <div className="flex items-center gap-6">
             <div className="flex flex-col items-center">
               <ProgressRing progress={recoveryData.todayScore} size={130} strokeWidth={10} color="#3b82f6" showLabel={true} />
-              <span className="text-xs font-bold text-blue-300 mt-2">Ready for Training</span>
+               <span className="text-xs font-bold text-blue-300 mt-2">Ready for Training</span>
             </div>
           </div>
         </div>

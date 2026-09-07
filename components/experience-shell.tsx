@@ -38,6 +38,7 @@ import { CoachChat } from "@/components/fitness/coach-chat";
 import { ProfileView } from "@/components/fitness/profile-view";
 import { TwinView } from "@/components/fitness/twin-view";
 import { RecoveryView } from "@/components/fitness/recovery-view";
+import { RecoveryPage } from "@/components/fitness/recovery-page";
 import { CommunityView } from "@/components/fitness/community-view";
 import { HistoryView } from "@/components/fitness/history-view";
 import { MusicView } from "@/components/fitness/music-view";
@@ -236,7 +237,7 @@ export function ExperienceShell({ slug }: { slug: string }) {
         return <ProgressView />;
       case "recovery":
       case "recovery-coach":
-        return <RecoveryView />;
+        return <RecoveryPage />;
       case "coach":
       case "ai-coach":
         return <CoachChat initialTab="home" />;

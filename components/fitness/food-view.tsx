@@ -39,11 +39,11 @@ interface FoodTabConfig {
   highlight?: boolean;
 }
 
-export function FoodView() {
+export function FoodView({ initialTab }: { initialTab?: string }) {
   const { profile, dailyLog, calorieTargets, macroTargets, logWater } = useFitness();
   const { t } = useTranslation();
 
-  const [activeTab, setActiveTab] = useState<string>("dashboard");
+  const [activeTab, setActiveTab] = useState<string>(initialTab || "dashboard");
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -54,6 +54,10 @@ export function FoodView() {
       }
     }
   }, []);
+
+  useEffect(() => {
+    if (initialTab) setActiveTab(initialTab);
+  }, [initialTab]);
 
   const [compiledPlan, setCompiledPlan] = useState<any | null>(null);
 

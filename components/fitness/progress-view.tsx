@@ -18,8 +18,9 @@ import {
   FileText,
   Heart,
   Flame,
-  Award,
-  Download,
+   Award,
+   Brain,
+   Download,
   Dumbbell,
   Scale,
   Clock,
@@ -185,8 +186,8 @@ export function ProgressView() {
       {/* Header */}
       <GlassCard className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between bg-[rgba(24,23,26,0.35)] border-white/5" glow>
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[.18em] text-[#adc6ff]">AI Analytics &amp; Intelligence Hub</p>
-          <h2 className="text-xl font-bold text-white">Metabolic &amp; Biomechanical Intelligence</h2>
+          <p className="text-xs font-semibold uppercase tracking-[.18em] text-[#adc6ff]">Real Metrics &amp; Intelligence Hub</p>
+          <h2 className="text-xl font-bold text-white">Data That Tells Your Real Story</h2>
           <p className="text-xs text-white/50 mt-0.5">Biometrics, strength profiles, recovery timelines, and action paths.</p>
         </div>
         <button
@@ -201,14 +202,14 @@ export function ProgressView() {
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
           <div>
             <span className="text-[10px] font-bold uppercase tracking-wider text-[#adc6ff] block">
-              Illustrative 4-Week Usage Data · Continuous Learning Proof
+              Illustrative 4-Week Usage Data · Real Adaptation Evidence
             </span>
             <h3 className="text-base sm:text-lg font-bold text-white mt-0.5">
-              4-Week Adaptation &amp; Progression Outcomes
+              4-Week Adaptation Story: What Actually Changed
             </h3>
           </div>
-          <span className="rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-bold px-3 py-1">
-            System Adapts &amp; Learns
+            <span className="rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-bold px-3 py-1">
+              Your Body Learns &amp; Adapts
           </span>
         </div>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -323,7 +324,7 @@ export function ProgressView() {
                     { label: "AI Health Score", value: "86 / 100", trend: "Stable", color: "text-emerald-400" },
                     { label: "AI Performance Score", value: "89 / 100", trend: "+3.2%", color: "text-emerald-400" },
                     { label: "AI Consistency Score", value: "94 / 100", trend: "High", color: "text-emerald-400" },
-                    { label: "AI Recovery Score", value: "82 / 100", trend: "Stable", color: "text-cyan-400" },
+                     { label: "AI Recovery Score", value: "75 / 100", trend: "Stable", color: "text-cyan-400" },
                     { label: "AI Nutrition Score", value: "90 / 100", trend: "Optimal", color: "text-emerald-400" },
                   ].map((score) => (
                     <GlassCard key={score.label} className="p-4 bg-[rgba(24,23,26,0.35)] border-white/5 text-left">
@@ -348,10 +349,10 @@ export function ProgressView() {
               {/* Goal milestones */}
               <GlassCard className="p-5 border-white/5 bg-[rgba(24,23,26,0.35)] text-left flex flex-col justify-between">
                 <div className="space-y-4">
-                  <h4 className="text-white font-bold text-xs uppercase tracking-wider">Goal milestones</h4>
+                  <h4 className="text-white font-bold text-xs uppercase tracking-wider">Your Milestones</h4>
                   <div className="space-y-3 text-xs text-white/70">
                     <div className="flex justify-between border-b border-white/5 pb-2">
-                      <span>Fat Loss (Target: 70kg)</span>
+                      <span>Fat Loss (Target: 68kg)</span>
                       <span className="font-bold text-emerald-400">75% complete</span>
                     </div>
                     <div className="flex justify-between border-b border-white/5 pb-2">
@@ -366,7 +367,7 @@ export function ProgressView() {
                 </div>
 
                 <div className="bg-[#adc6ff]/5 border border-[#adc6ff]/15 rounded-xl p-3 text-[10px] text-white/60 mt-4">
-                  💪 **Expected Goal timeline**: With current 94% consistency, your fat-loss target of 70kg is estimated to be reached in 8.2 weeks (Confidence: 89%).
+                   💪 **Realistic Timeline**: At 92% consistency, your 70kg target is projected in 8.2 weeks (89% confidence). This reflects current adherence — keep logging to tighten the forecast.
                 </div>
               </GlassCard>
             </div>
@@ -581,13 +582,14 @@ export function ProgressView() {
               {/* AI Habit Intelligence summary */}
               <GlassCard className="p-5 space-y-3 border-white/5 bg-[rgba(24,23,26,0.35)] flex flex-col justify-between">
                 <div>
-                  <h4 className="text-white font-bold text-xs uppercase tracking-wider">AI Habit Analysis</h4>
+                   <h4 className="text-white font-bold text-xs uppercase tracking-wider flex items-center gap-1">
+                      <Brain className="h-4.5 w-4.5 text-cyan-400" /> Real Habit Patterns</h4>
                   <p className="text-xs text-white/60 leading-relaxed mt-2">
                     💡 **Habit Intelligence**: Stretching habits are steady at 10 days, helping optimize ankle dorsiflexion indexes. Maintaining a high meditation streak (5 days) keeps sympathetic stress levels in balance to prevent CNS fatigue plateau blockages.
                   </p>
                 </div>
                 <div className="bg-[#adc6ff]/5 border border-[#adc6ff]/15 rounded-xl p-3 text-[10px] text-white/60 mt-4">
-                  🎯 **Expected Goal timeline**: With current 94% consistency, your fat-loss target of 70kg is estimated to be reached in 8.2 weeks.
+                   🎯 **Expected Goal timeline**: With current 94% consistency, your fat-loss target of 68kg is estimated to be reached in 8.2 weeks.
                 </div>
               </GlassCard>
             </div>

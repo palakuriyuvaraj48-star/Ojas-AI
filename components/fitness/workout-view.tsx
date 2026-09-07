@@ -9,11 +9,12 @@ import { Badge } from "@/components/ui/badge";
 import { 
   Play, Pause, RefreshCw, Zap, Flame, Sparkles, AlertTriangle, Info, 
   Search, ShieldAlert, Award, Calendar, CheckCircle2, ChevronRight, 
-  Dumbbell, Trophy, Video, Mic, RefreshCcw, BarChart3, Clock, Camera
+  Dumbbell, Trophy, Video, Mic, RefreshCcw, BarChart3, Clock, Camera, Activity
 } from "lucide-react";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { useTranslation } from "@/lib/i18n";
 import { TranslationDictionary } from "@/lib/i18n/types";
+import { FeatureDiscoverySection } from "@/components/feature-discovery";
 
 interface Exercise {
   id: string;
@@ -34,12 +35,12 @@ interface Exercise {
   overload: string;
 }
 
-export function WorkoutView() {
+export function WorkoutView({ initialTab }: { initialTab?: string }) {
   const { profile, activeWorkout, toggleExercise, completeWorkout, setWorkoutId, streak } = useFitness();
   const { t } = useTranslation();
   
   // Navigation Routing Tabs
-  const [activeTab, setActiveTab] = useState<string>("dashboard");
+  const [activeTab, setActiveTab] = useState<string>(initialTab || "dashboard");
 
   // Sync tab via URL query parameter safely
   useEffect(() => {
@@ -51,6 +52,10 @@ export function WorkoutView() {
       }
     }
   }, [typeof window !== "undefined" ? window.location.search : ""]);
+
+  useEffect(() => {
+    if (initialTab) setActiveTab(initialTab);
+  }, [initialTab]);
 
   // Tab 2: Generator Input States
   const [goal, setGoal] = useState<string>("muscle");
@@ -256,6 +261,21 @@ export function WorkoutView() {
 
   return (
     <div className="space-y-6 relative text-left">
+      <FeatureDiscoverySection
+        eyebrow="Train with OJAS"
+        title="Today’s training, made discoverable"
+        description="Your training adapts to your current time, recovery, goals, and readiness. Open an existing OJAS experience to continue."
+        features={[
+          { title: "Today’s Workout", description: "See today’s recommendation based on your current state.", href: "/train/today", icon: Dumbbell, status: "Available" },
+          { title: "Workout Plans", description: "Explore the current training plan and organized sessions.", href: "/train/plan", icon: Calendar, status: "Available" },
+          { title: "Exercise Library", description: "Browse available exercises and training movements.", href: "/train/exercises", icon: Search, status: "Available" },
+          { title: "Mobility", description: "Access mobility-focused training already available in OJAS.", href: "/train/mobility", icon: Activity, status: "Available" },
+          { title: "Stretching", description: "Explore available stretching routines.", href: "/train/stretching", icon: Activity, status: "Available" },
+          { title: "Rest Day", description: "Use recovery-aware rest-day planning.", href: "/train/rest-day", icon: Clock, status: "Available" },
+          { title: "Workout History", description: "Review previous workout activity and history.", href: "/train/history", icon: Trophy, status: "Available" },
+          { title: "Workout Music", description: "Access the existing workout music experience.", href: "/train/music", icon: Mic, status: "Available" },
+        ]}
+      />
       
       {/* Celebration Award Modal */}
       {showCelebration && (

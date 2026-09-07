@@ -25,10 +25,14 @@ import { GitCompareArrows, Scale, Award, Sparkles, Activity, TrendingUp, Moon, W
 import { useTranslation } from "@/lib/i18n";
 import { TranslationDictionary } from "@/lib/i18n/types";
 
-export function RecoveryView() {
+export function RecoveryView({ initialTab }: { initialTab?: string }) {
   const { profile, dailyLog, calorieTargets, macroTargets } = useFitness();
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState("dashboard");
+  const [activeTab, setActiveTab] = useState(initialTab || "dashboard");
+
+  useEffect(() => {
+    if (initialTab) setActiveTab(initialTab);
+  }, [initialTab]);
 
   if (!profile || !calorieTargets || !macroTargets) return null;
 

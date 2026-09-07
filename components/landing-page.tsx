@@ -1858,7 +1858,10 @@ export function LandingPage() {
 
         {/* Simple Footer */}
         <footer className="flex flex-wrap items-center justify-between border-t border-white/10 py-6 text-xs text-white/40">
-          <p>© {new Date().getFullYear()} Ojas AI — Adaptive Fitness System for SIH</p>
+          <div className="space-y-1">
+            <p>© 2026 OJAS AI — Smart India Hackathon 2026 | Niet-SafeSecure, Team ID 53476 | Built for Real Fitness</p>
+            <p className="text-[10px]">Privacy-first. Data on-device. Honest about progress.</p>
+          </div>
           <div className="flex gap-4">
             <button onClick={() => scrollTo("hero")} className="hover:text-white transition">Back to top ↑</button>
           </div>

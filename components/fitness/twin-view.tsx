@@ -381,6 +381,20 @@ export function TwinView() {
               {/* TAB 1: Visual Twin Dashboard */}
               {tab === "twin" && (
                 <div className="space-y-6">
+                  {/* Adaptation Story Summary */}
+                  <GlassCard className="p-5 border-cyan-400/20 bg-gradient-to-r from-cyan-950/20 via-slate-900/60 to-cyan-950/20">
+                    <h4 className="font-bold text-cyan-300 text-xs uppercase tracking-wider flex items-center gap-2">
+                      <TrendingUp className="h-4 w-4 text-cyan-400" />
+                      Your Adaptation Story So Far
+                    </h4>
+                    <p className="text-xs text-white/70 mt-2 leading-relaxed">
+                      Weight: 78.5kg → 68.5kg (-10kg) · Consistency: 62% → 94% · Recovery: 82 → 75 (sleep-adjusted) · Form: 74 → 88
+                    </p>
+                    <p className="text-[10px] text-cyan-300 mt-1.5">
+                      What drove this: Hostel time compression, exam-period recovery gating, and daily form feedback from computer vision.
+                    </p>
+                  </GlassCard>
+
                   {/* Scores Grid */}
                   <div className="grid gap-3 grid-cols-2">
                     {[
@@ -458,6 +472,7 @@ export function TwinView() {
                       <div className="p-2.5 rounded-xl bg-white/5 border border-white/5">
                         <span className="text-[10px] text-white/50 block">Primary Gap</span>
                         <strong className="text-amber-300 font-bold">{userState.digitalTwin.sport.gapName} ({userState.digitalTwin.sport.gap} pts)</strong>
+                        <p className="text-[9px] text-amber-200 mt-0.5">Your biggest lever for Football/Soccer performance</p>
                       </div>
                     </div>
                     <Link
@@ -475,10 +490,9 @@ export function TwinView() {
                 <div className="space-y-5">
                   <GlassCard className="p-5 space-y-4 border-cyan-400/20 bg-black/40">
                     <div className="flex items-center justify-between border-b border-white/5 pb-2">
-                      <h4 className="font-bold text-white text-sm flex items-center gap-2">
-                        <TrendingUp className="h-4 w-4 text-cyan-400" /> What Changed?
-                      </h4>
-                      <span className="text-[10px] text-white/40">This Period vs Previous</span>
+                    <h4 className="font-bold text-white text-sm flex items-center gap-2">
+                        <TrendingUp className="h-4 w-4 text-cyan-400" /> What Changed? Your Adaptation Story</h4>
+                    <span className="text-[10px] text-white/40">Compared to 4 weeks ago</span>
                     </div>
 
                     <div className="grid gap-3 sm:grid-cols-2 text-xs">
@@ -555,10 +569,9 @@ export function TwinView() {
                   {/* "What Does This Mean?" Explainable Analysis */}
                   <GlassCard className="p-5 space-y-3 border-white/5 bg-[rgba(24,23,26,0.35)]">
                     <h4 className="text-xs font-bold uppercase tracking-wider text-cyan-300 flex items-center gap-2">
-                      <Brain className="h-4 w-4" /> What Does This Mean?
-                    </h4>
+                      <Brain className="h-4 w-4" /> Why This Matters</h4>
                     <p className="text-xs text-white/80 leading-relaxed">
-                      “Your movement technique and consistency have significantly improved, but reduced sleep and available time create temporary central nervous system fatigue. Ojas automatically compresses your workout to 20 minutes with active recovery to preserve strength while protecting joint health.”
+                      Your movement technique and consistency improved significantly. Reduced sleep (7.5→{dashboardState.sleepDuration.toFixed(1)}h) and compressed workout windows create temporary CNS fatigue. Ojas adapted by compressing your session to {recommendation.duration}m with active recovery to preserve strength while protecting joint health.
                     </p>
                   </GlassCard>
                 </div>
